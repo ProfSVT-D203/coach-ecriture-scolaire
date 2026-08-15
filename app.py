@@ -59,10 +59,6 @@ def assembler_chronique():
 
 
 def invalider_apres(partie):
-    """
-    Lorsqu'un élève modifie une partie déjà validée,
-    les validations situées après cette partie sont annulées.
-    """
 
     ordre = {
         "comprehension": 1,
@@ -798,26 +794,73 @@ elif st.session_state.etape == "controle_introduction":
 
 TU CONTRÔLES UNIQUEMENT L'INTRODUCTION.
 
-Une introduction doit permettre :
-1. d'identifier suffisamment le sujet ;
-2. de comprendre ce qui le rend particulier, intéressant ou important.
+RÔLE DE L'INTRODUCTION :
 
-Pour 6e-5e :
-une ou deux phrases simples peuvent suffire.
+L'introduction doit seulement permettre :
+1. d'identifier suffisamment le sujet de la chronique ;
+2. de comprendre pourquoi ce sujet peut présenter un intérêt
+   pour l'auditeur.
 
-N'exige PAS systématiquement :
-- une date ;
-- un chiffre ;
-- un nombre ;
-- un lieu précis ;
+Elle n'a PAS pour rôle d'expliquer déjà le développement.
+
+RÈGLE TRÈS IMPORTANTE POUR 6e-5e :
+
+Une ou deux phrases simples peuvent suffire.
+
+Si le sujet est identifiable et qu'au moins un élément permet
+de comprendre son intérêt, l'introduction DOIT être validée.
+
+Par exemple, dire qu'il s'agit :
+- d'une nouvelle technique contre une maladie ;
+- d'une découverte ;
+- d'un événement particulier ;
+- d'un phénomène remarquable ;
+- d'une situation présentant un enjeu,
+
+peut suffire à montrer l'intérêt du sujet.
+
+NE BLOQUE JAMAIS une introduction correcte de niveau 6e-5e
+simplement parce qu'elle n'explique pas encore :
+- comment fonctionne une technique ;
+- son mécanisme ;
 - une cause ;
+- une conséquence ;
+- les résultats ;
+- une date ;
+- un nombre ;
+- une statistique ;
+- un lieu plus précis ;
 - un exemple ;
-- un détail technique,
+- un détail scientifique ou technique.
 
-si l'introduction remplit déjà ses deux fonctions.
+Ces informations peuvent naturellement être expliquées
+dans le développement.
 
-Une introduction trop générale, qui pourrait convenir
-à presque n'importe quel sujet, n'est pas suffisante.
+CAS IMPORTANT :
+
+Une introduction de niveau 6e-5e qui annonce clairement
+« une nouvelle technique testée pour lutter contre le cancer
+du pancréas » identifie suffisamment le sujet et son intérêt.
+
+Elle ne doit PAS être refusée au motif qu'elle n'explique pas encore
+comment cette technique agit sur la tumeur.
+
+Ne transforme jamais une possibilité d'enrichissement
+en condition obligatoire de validation.
+
+UNE INTRODUCTION DOIT ÊTRE REFUSÉE seulement si, par exemple :
+- le sujet n'est pas identifiable ;
+- elle contient une erreur importante ;
+- elle déforme la source ;
+- elle est tellement générale qu'elle pourrait convenir
+  à presque n'importe quel sujet ;
+- elle reprend de manière trop proche une phrase de la source ;
+- elle est réellement incompréhensible à la première écoute.
+
+Pour 4e-3e :
+tu peux attendre davantage de précision et de contextualisation,
+mais sans demander que l'introduction contienne déjà
+les explications du développement.
 
 Vérifie aussi :
 - fidélité à la source ;
@@ -825,7 +868,18 @@ Vérifie aussi :
 - compréhension à la première écoute ;
 - respect du plan.
 
-Pour plusieurs voix, les répliques doivent être identifiables.
+Pour plusieurs voix :
+les répliques doivent être clairement identifiables.
+
+AVANT DE REFUSER L'INTRODUCTION, pose-toi obligatoirement
+cette question :
+
+« L'information que je souhaite demander est-elle indispensable
+pour identifier le sujet et comprendre son intérêt,
+ou pourrait-elle normalement être expliquée dans le développement ? »
+
+Si elle peut normalement être expliquée dans le développement,
+NE LA DEMANDE PAS et valide l'introduction si le reste est correct.
 
 Si l'introduction est suffisante, réponds exactement :
 
@@ -1614,6 +1668,12 @@ accepte :
 Une introduction est suffisante si :
 - le sujet est identifiable ;
 - au moins une information permet de comprendre son intérêt.
+
+IMPORTANT :
+une introduction correcte de niveau 6e-5e ne doit pas être rejetée
+parce qu'elle n'explique pas encore un mécanisme, une cause,
+un chiffre ou un détail qui peut naturellement être présenté
+dans le développement.
 
 Un développement est suffisant s'il permet de comprendre
 quelques idées essentielles sélectionnées.
