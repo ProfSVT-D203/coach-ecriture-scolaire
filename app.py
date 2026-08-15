@@ -158,10 +158,6 @@ def afficher_sidebar_libre():
 
         st.header("📻 Mémo écriture radio")
 
-        # -------------------------------------------------
-        # THÈME / SUJET / ANGLE
-        # -------------------------------------------------
-
         if etape in [
             "libre_cadrage",
             "libre_angle_verif"
@@ -209,10 +205,6 @@ Les principaux changements de la rentrée 2026 dans notre collège
             st.info(
                 "Un même sujet peut avoir plusieurs angles."
             )
-
-        # -------------------------------------------------
-        # RECHERCHES / 5 W
-        # -------------------------------------------------
 
         elif etape in [
             "libre_recherches",
@@ -265,10 +257,6 @@ Que faut-il faire comprendre ?
                 "Toutes ces questions ne sont pas forcément utiles "
                 "pour chaque chronique."
             )
-
-        # -------------------------------------------------
-        # PLAN ET RÉDACTION
-        # -------------------------------------------------
 
         elif etape in [
             "plan",
@@ -334,10 +322,6 @@ Ces éléments sont des possibilités, pas des obligations.
 """
             )
 
-        # -------------------------------------------------
-        # RÉFÉRENCES
-        # -------------------------------------------------
-
         elif etape in [
             "references",
             "controle_references"
@@ -349,7 +333,15 @@ Ces éléments sont des possibilités, pas des obligations.
                 """
 Une information doit pouvoir être reliée à une source.
 
-Pour chaque source, essaie d'indiquer :
+Une source peut être par exemple :
+
+- une observation directe ;
+- une information donnée dans le collège ;
+- un document ou un site ;
+- un témoignage ;
+- une interview déjà réalisée.
+
+Pour un article ou un site, indique si possible :
 
 - auteur ou organisme ;
 - titre ;
@@ -359,19 +351,20 @@ Pour chaque source, essaie d'indiquer :
 """
             )
 
-            st.divider()
+            st.warning(
+                "Une interview seulement prévue n'est pas encore "
+                "une source utilisée."
+            )
 
             if st.session_state.libre_angle:
+
+                st.divider()
 
                 st.caption("Angle de ta chronique")
 
                 st.write(
                     st.session_state.libre_angle
                 )
-
-        # -------------------------------------------------
-        # ASSEMBLAGE / CONTRÔLE FINAL
-        # -------------------------------------------------
 
         elif etape in [
             "chronique_assemblee",
@@ -614,7 +607,9 @@ def generer_pdf():
 
     bloc_references = [
         Paragraph(
-            "Références",
+            "Sources utilisées"
+            if st.session_state.parcours == "libre"
+            else "Références",
             style_section
         ),
         Paragraph(
@@ -696,7 +691,7 @@ initialiser("ref_titre")
 initialiser("ref_media")
 initialiser("ref_date")
 
-# Références libres
+# Sources libres
 initialiser("libre_references")
 
 initialiser("feedback_references")
@@ -1170,10 +1165,6 @@ Tu vérifies uniquement la relation :
 
 THÈME → SUJET → ANGLE.
 
-=========================================================
-1. DÉFINITIONS
-=========================================================
-
 Le THÈME est le domaine général.
 
 Le SUJET est un aspect plus précis de ce thème.
@@ -1183,14 +1174,9 @@ ce que l'élève veut principalement raconter,
 faire comprendre, observer ou découvrir.
 
 L'angle sert surtout à déterminer
-DANS QUELLE DIRECTION L'ÉLÈVE VA FAIRE SES RECHERCHES.
-
-=========================================================
-2. CE QU'UN ANGLE DOIT PERMETTRE
-=========================================================
+dans quelle direction l'élève va faire ses recherches.
 
 Un angle est suffisamment précis lorsque :
-
 - on comprend clairement de quoi la chronique va parler ;
 - on comprend quel aspect du sujet sera privilégié ;
 - l'élève sait dans quelle direction commencer ses recherches.
@@ -1199,33 +1185,10 @@ Il n'est PAS nécessaire, à ce stade,
 de connaître déjà toutes les informations
 qui apparaîtront dans la chronique.
 
-=========================================================
-3. RÈGLE TRÈS IMPORTANTE
-=========================================================
-
 NE CONFONDS PAS :
-
 « choisir un angle »
-
 avec
-
 « construire déjà le contenu de la chronique ».
-
-L'étape actuelle se situe AVANT les recherches.
-
-L'élève n'a donc pas encore besoin de savoir précisément :
-- toutes les informations qu'il trouvera ;
-- tous les exemples qu'il utilisera ;
-- toutes les personnes qu'il interrogera ;
-- toutes les nouveautés qu'il présentera ;
-- toutes les causes ou conséquences ;
-- tous les sous-thèmes qu'il retiendra.
-
-Ces choix seront faits APRÈS les recherches.
-
-=========================================================
-4. NE PAS DEMANDER LES RÉSULTATS DES RECHERCHES
-=========================================================
 
 Si l'angle permet déjà de savoir dans quelle direction chercher,
 tu dois le valider.
@@ -1252,39 +1215,15 @@ Présenter les principaux changements de la rentrée 2026
 dans notre collège.
 
 Cet angle est suffisamment précis.
-
 Tu dois donc le VALIDER.
-
-=========================================================
-5. NE PAS ORIENTER LE CONTENU
-=========================================================
 
 Tu ne dois PAS proposer toi-même une liste de catégories,
 de sous-thèmes ou d'exemples qui ne viennent pas de l'élève.
 
-Tu peux uniquement poser une question ouverte
-si l'angle est réellement trop large.
-
-=========================================================
-6. QUAND L'ANGLE EST TROP LARGE
-=========================================================
-
 Un angle est réellement trop large si :
 - il répète simplement le thème ou le sujet ;
 - il permettrait de parler de presque tout ;
-- il ne donne aucune direction de recherche ;
-- plusieurs chroniques très différentes pourraient correspondre
-  exactement à la même formulation.
-
-Dans ce cas :
-
-- ne propose pas toi-même un angle ;
-- ne donne pas une liste de possibilités ;
-- pose UNE seule question ouverte.
-
-=========================================================
-7. RÈGLE D'ARRÊT
-=========================================================
+- il ne donne aucune direction de recherche.
 
 Avant de répondre « À REVOIR », demande-toi :
 
@@ -1294,12 +1233,8 @@ de savoir dans quelle direction commencer ses recherches ? »
 Si OUI :
 tu dois valider l'angle.
 
-=========================================================
-8. VALIDATION
-=========================================================
-
-Si thème, sujet et angle forment un ensemble suffisamment clair
-pour commencer les recherches, réponds exactement :
+Si thème, sujet et angle sont suffisamment clairs,
+réponds exactement :
 
 ANGLE VALIDÉ
 Ton sujet et ton angle sont suffisamment précis.
@@ -1310,10 +1245,10 @@ Sinon commence exactement par :
 À REVOIR
 
 Puis :
-- explique très brièvement ce qui reste trop large ;
+- explique brièvement ce qui reste trop large ;
 - pose UNE seule question ouverte ;
 - ne propose pas toi-même la réponse ;
-- ne donne pas de liste d'exemples ou de catégories.
+- ne donne pas de liste d'exemples.
 """
 
             contenu = f"""
@@ -1394,7 +1329,8 @@ elif st.session_state.etape == "libre_recherches":
 
     st.info(
         "Tu peux utiliser plusieurs sources. "
-        "Copie ici tes notes, extraits utiles et références."
+        "Copie ici tes notes, les informations utiles "
+        "et indique d'où elles viennent."
     )
 
     libre_recherches = st.text_area(
@@ -1473,7 +1409,15 @@ SÉLECTIONNER N'EST PAS DÉFORMER.
 
 L'élève n'a pas à utiliser toutes les informations trouvées.
 
-Ne rédige jamais la chronique à sa place.
+Une observation directe peut constituer une source.
+
+Une information connue ou obtenue dans le collège
+peut également être utilisée si elle est présentée comme telle.
+
+Ne demande pas automatiquement une référence bibliographique
+complète à cette étape.
+
+Ne rédige jamais la chronique à la place de l'élève.
 
 Si une information retenue n'est pas soutenue par les recherches :
 pose UNE question ciblée.
@@ -2340,11 +2284,18 @@ elle doit rester cohérente avec l'angle choisi.
 Ne demande pas une information supplémentaire
 simplement pour enrichir le texte.
 
+Si une information nouvelle concernant un événement futur
+apparaît dans la conclusion,
+tu peux demander à l'élève de la confirmer
+si elle n'apparaissait pas encore dans ses recherches.
+
+Ne considère pas automatiquement cette information comme fausse.
+
 Si elle est suffisante, réponds exactement :
 
 CONCLUSION VALIDÉE
 La conclusion apporte une véritable idée de fin.
-Tu peux passer aux références.
+Tu peux passer aux sources utilisées.
 
 Sinon commence exactement par :
 
@@ -2398,7 +2349,11 @@ CONCLUSION :
 
             st.success("✅ Conclusion validée")
 
-            if st.button("Indiquer mes références"):
+            if st.button(
+                "Indiquer mes sources"
+                if st.session_state.parcours == "libre"
+                else "Indiquer mes références"
+            ):
 
                 st.session_state.etape = "references"
                 st.rerun()
@@ -2418,14 +2373,14 @@ CONCLUSION :
 
 
 # =========================================================
-# RÉFÉRENCES
+# SOURCES / RÉFÉRENCES
 # =========================================================
 
 elif st.session_state.etape == "references":
 
-    st.subheader("Références")
-
     if st.session_state.parcours == "guide":
+
+        st.subheader("Références")
 
         st.write(
             "Retrouve toi-même les références dans la source."
@@ -2484,28 +2439,42 @@ elif st.session_state.etape == "references":
 
     else:
 
+        st.subheader("Sources utilisées")
+
         st.write(
-            "Indique les sources réellement utilisées pour ta chronique."
+            "Indique les sources que tu as réellement utilisées "
+            "pour préparer cette chronique."
         )
 
         st.info(
-            "Tu peux avoir plusieurs sources. "
-            "Indique assez d'informations pour pouvoir les retrouver : "
-            "auteur ou organisme, titre, média/site, date, lien si tu l'as."
+            "Une source peut être un article, un site, un document, "
+            "une observation directe, une information obtenue dans le collège, "
+            "un témoignage ou une interview déjà réalisée."
+        )
+
+        st.warning(
+            "Une interview seulement prévue ne doit pas encore être "
+            "présentée comme une source utilisée."
         )
 
         libre_references = st.text_area(
-            "Mes références :",
+            "Mes sources utilisées :",
             value=st.session_state.libre_references,
-            height=220
+            height=220,
+            placeholder=(
+                "Exemples :\n"
+                "- Observation directe : travaux de rénovation de la cour, rentrée 2026.\n"
+                "- Information interne au collège : arrivée de nouveaux enseignants, rentrée 2026.\n"
+                "- Site / article : auteur ou organisme, titre, média, date, lien."
+            )
         )
 
-        if st.button("Enregistrer mes références"):
+        if st.button("Enregistrer mes sources"):
 
             if not libre_references.strip():
 
                 st.warning(
-                    "Indique au moins une référence."
+                    "Indique au moins une source utilisée."
                 )
 
             else:
@@ -2521,13 +2490,20 @@ elif st.session_state.etape == "references":
 
 elif st.session_state.etape == "controle_references":
 
-    st.subheader("Tes références")
+    if st.session_state.parcours == "guide":
+        st.subheader("Tes références")
+    else:
+        st.subheader("Tes sources utilisées")
 
     st.write(
         references_affichees()
     )
 
-    if st.button("Modifier mes références"):
+    if st.button(
+        "Modifier mes références"
+        if st.session_state.parcours == "guide"
+        else "Modifier mes sources"
+    ):
 
         st.session_state.etape = "references"
         st.rerun()
@@ -2536,27 +2512,168 @@ elif st.session_state.etape == "controle_references":
 
     if not st.session_state.feedback_references:
 
-        if st.button("🤖 Vérifier mes références"):
+        if st.button(
+            "🤖 Vérifier mes références"
+            if st.session_state.parcours == "guide"
+            else "🤖 Vérifier mes sources"
+        ):
 
             instructions = """
-Tu vérifies uniquement les références d'une chronique.
+Tu vérifies uniquement les sources ou références
+d'une chronique Radio ISTJ.
 
-Compare les références avec les documents et recherches
-fournis par l'élève.
+=========================================================
+PARCOURS GUIDÉ
+=========================================================
 
 Dans le parcours guidé :
-vérifie auteur, titre, média et date.
+vérifie auteur, titre, média et date
+par rapport à la source fournie.
 
-Dans le parcours libre :
-plusieurs sources sont possibles.
+=========================================================
+PARCOURS LIBRE
+=========================================================
 
-Vérifie surtout que les sources citées correspondent
-aux recherches utilisées et permettent raisonnablement
-de retrouver les documents.
+Dans le parcours libre,
+le niveau de référencement doit rester adapté
+à un travail de collégien en journalisme radio.
 
-Tu ne fabriques pas de référence à la place de l'élève.
+Une source peut être :
 
-Si tout est suffisant, réponds exactement :
+- une observation directe ;
+- une information obtenue ou connue dans le collège ;
+- un document ;
+- un article ;
+- un site internet ;
+- un témoignage ;
+- une interview DÉJÀ réalisée.
+
+Une source n'a pas besoin d'être présentée
+comme une référence universitaire.
+
+L'objectif est seulement :
+- de comprendre d'où vient l'information ;
+- de pouvoir distinguer une information observée,
+  obtenue, lue ou entendue ;
+- de permettre raisonnablement de retrouver
+  une source documentaire lorsqu'il s'agit d'un article ou d'un site.
+
+=========================================================
+OBSERVATIONS DIRECTES
+=========================================================
+
+Une formulation comme :
+
+« Observation directe : travaux de rénovation de la cour,
+rentrée 2026 »
+
+peut être suffisante.
+
+N'exige PAS automatiquement :
+- le jour exact ;
+- l'heure ;
+- les noms des élèves ayant observé ;
+- les modalités de l'observation.
+
+Demande une précision seulement
+si l'absence de cette précision rend réellement
+la source impossible à comprendre.
+
+=========================================================
+INFORMATIONS INTERNES AU COLLÈGE
+=========================================================
+
+Une formulation comme :
+
+« Information interne au collège :
+arrivée de nouveaux enseignants, rentrée 2026 »
+
+peut être acceptée pour une chronique scolaire simple.
+
+N'exige pas systématiquement :
+- le nom exact de la personne ayant donné l'information ;
+- une date précise ;
+- un document administratif ;
+
+sauf si l'information est contestable,
+très précise ou nécessite réellement une vérification supplémentaire.
+
+=========================================================
+EXPÉRIENCE DES ÉLÈVES
+=========================================================
+
+Une expérience collective ou une observation générale
+peut être utilisée si elle est présentée clairement comme telle.
+
+N'exige pas automatiquement :
+- le nom des élèves ;
+- leur classe exacte ;
+- une méthode d'enquête ;
+- des modalités détaillées.
+
+Ne transforme pas une chronique scolaire
+en travail de recherche académique.
+
+=========================================================
+INTERVIEWS
+=========================================================
+
+Une interview DÉJÀ réalisée peut être une source.
+
+Dans ce cas,
+il est utile d'indiquer au minimum :
+- la personne interrogée ;
+- son rôle ;
+- si possible la date ou le contexte.
+
+En revanche :
+
+UNE INTERVIEW SEULEMENT PRÉVUE
+NE PEUT PAS ÊTRE PRÉSENTÉE
+COMME UNE SOURCE DÉJÀ UTILISÉE.
+
+Si elle est seulement annoncée pour plus tard,
+elle peut apparaître dans la chronique
+comme une future interview,
+mais pas dans la liste des sources utilisées.
+
+=========================================================
+ARTICLES / SITES / DOCUMENTS
+=========================================================
+
+Pour une source documentaire,
+essaie de vérifier qu'elle peut être retrouvée
+avec suffisamment d'informations :
+
+- auteur ou organisme si disponible ;
+- titre ;
+- média ou site ;
+- date si disponible ;
+- lien si l'élève l'a.
+
+N'exige pas un élément qui n'existe pas.
+
+=========================================================
+RÈGLE DE PROPORTION
+=========================================================
+
+Avant de demander une précision,
+pose-toi cette question :
+
+« Cette précision est-elle nécessaire
+pour comprendre d'où vient l'information,
+ou rendrait-elle seulement la référence plus complète ? »
+
+Si elle rendrait seulement la référence plus complète :
+NE LA DEMANDE PAS.
+
+=========================================================
+VALIDATION
+=========================================================
+
+Si les sources sont suffisamment identifiables
+et correspondent aux recherches réellement utilisées,
+réponds exactement :
 
 RÉFÉRENCES VALIDÉES
 Les références correspondent aux sources utilisées.
@@ -2564,6 +2681,12 @@ Les références correspondent aux sources utilisées.
 Sinon commence exactement par :
 
 À REVOIR
+
+Puis :
+- signale seulement les problèmes réellement importants ;
+- ne transforme pas l'exercice en bibliographie universitaire ;
+- ne demande pas des précisions inutiles ;
+- n'invente jamais une source à la place de l'élève.
 """
 
             contenu = f"""
@@ -2573,14 +2696,16 @@ PARCOURS :
 DOCUMENTS / RECHERCHES :
 {contexte_documentaire()}
 
-RÉFÉRENCES :
+SOURCES / RÉFÉRENCES DONNÉES PAR L'ÉLÈVE :
 {references_affichees()}
 """
 
             try:
 
                 with st.spinner(
-                    "Le Coach vérifie les références..."
+                    "Le Coach vérifie les sources..."
+                    if st.session_state.parcours == "libre"
+                    else "Le Coach vérifie les références..."
                 ):
 
                     st.session_state.feedback_references = appel_ia(
@@ -2605,7 +2730,10 @@ RÉFÉRENCES :
             "RÉFÉRENCES VALIDÉES"
         ):
 
-            st.success("✅ Références validées")
+            if st.session_state.parcours == "guide":
+                st.success("✅ Références validées")
+            else:
+                st.success("✅ Sources validées")
 
             if st.button("Assembler ma chronique"):
 
@@ -2625,7 +2753,11 @@ RÉFÉRENCES :
                 st.session_state.feedback_references
             )
 
-            if st.button("Corriger mes références"):
+            if st.button(
+                "Corriger mes références"
+                if st.session_state.parcours == "guide"
+                else "Corriger mes sources"
+            ):
 
                 st.session_state.etape = "references"
                 st.rerun()
@@ -2682,7 +2814,7 @@ Vérifie :
 1. FIDÉLITÉ
 
 Toute information factuelle doit être justifiable
-par les documents et recherches fournis.
+par les documents, notes, observations ou recherches fournis.
 
 SÉLECTIONNER N'EST PAS DÉFORMER.
 
@@ -2728,7 +2860,23 @@ Une accroche spectaculaire, des images mentales
 ou un habillage sonore sont des possibilités,
 pas des obligations.
 
-7. NIVEAU
+7. SOURCES
+
+Dans le parcours libre,
+les sources peuvent être :
+- observation directe ;
+- information interne au collège ;
+- document ou site ;
+- témoignage ;
+- interview déjà réalisée.
+
+N'exige pas un référencement universitaire.
+
+En revanche,
+une interview seulement prévue
+ne doit pas être présentée comme une source déjà utilisée.
+
+8. NIVEAU
 
 6e-5e :
 accepte un texte simple et quelques idées essentielles.
@@ -2896,7 +3044,11 @@ CHRONIQUE :
 
                     st.rerun()
 
-                if st.button("Corriger les références"):
+                if st.button(
+                    "Corriger les références"
+                    if st.session_state.parcours == "guide"
+                    else "Corriger les sources"
+                ):
 
                     st.session_state.feedback_references = ""
                     st.session_state.feedback_final = ""
