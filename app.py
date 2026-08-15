@@ -163,10 +163,6 @@ def afficher_sidebar_libre():
 
         st.header("📻 Mémo écriture radio")
 
-        # -------------------------------------------------
-        # THÈME / SUJET / ANGLE
-        # -------------------------------------------------
-
         if etape in [
             "libre_cadrage",
             "libre_angle_verif"
@@ -214,10 +210,6 @@ Les principaux changements de la rentrée 2026 dans notre collège
             st.info(
                 "Un même sujet peut avoir plusieurs angles."
             )
-
-        # -------------------------------------------------
-        # RECHERCHES / 5W
-        # -------------------------------------------------
 
         elif etape in [
             "libre_recherches",
@@ -270,10 +262,6 @@ Que faut-il faire comprendre ?
                 "Toutes ces questions ne sont pas forcément utiles "
                 "pour chaque chronique."
             )
-
-        # -------------------------------------------------
-        # PLAN ET RÉDACTION
-        # -------------------------------------------------
 
         elif etape in [
             "plan",
@@ -339,10 +327,6 @@ Ces éléments sont des possibilités, pas des obligations.
 """
             )
 
-        # -------------------------------------------------
-        # SOURCES
-        # -------------------------------------------------
-
         elif etape in [
             "references",
             "controle_references"
@@ -386,10 +370,6 @@ Pour un article ou un site, indique si possible :
                 st.write(
                     st.session_state.libre_angle
                 )
-
-        # -------------------------------------------------
-        # ASSEMBLAGE / CONTRÔLE FINAL
-        # -------------------------------------------------
 
         elif etape in [
             "chronique_assemblee",
@@ -557,10 +537,6 @@ def generer_pdf():
 
     elements = []
 
-    # -----------------------------------------------------
-    # EN-TÊTE
-    # -----------------------------------------------------
-
     elements.append(
         Paragraph(
             "RADIO ISTJ",
@@ -606,10 +582,6 @@ def generer_pdf():
 
     elements.append(Spacer(1, 0.2 * cm))
 
-    # -----------------------------------------------------
-    # CHRONIQUE ORALE
-    # -----------------------------------------------------
-
     elements.append(
         Paragraph(
             "Chronique",
@@ -639,10 +611,6 @@ def generer_pdf():
     )
 
     elements.append(Spacer(1, 0.35 * cm))
-
-    # -----------------------------------------------------
-    # SOURCES / RÉFÉRENCES — NON LUES À L'ANTENNE
-    # -----------------------------------------------------
 
     bloc_references = [
         Paragraph(
@@ -684,14 +652,12 @@ initialiser("parcours", "")
 initialiser("niveau", "6e-5e")
 initialiser("nombre_voix", "1 voix")
 
-# Parcours guidé
 initialiser("source")
 initialiser("sujet")
 initialiser("idees")
 initialiser("vocabulaire")
 initialiser("feedback_comprehension")
 
-# Parcours libre
 initialiser("libre_theme")
 initialiser("libre_sujet")
 initialiser("libre_angle")
@@ -707,14 +673,12 @@ initialiser("libre_where")
 initialiser("libre_when")
 initialiser("libre_whyhow")
 
-# Plan commun
 initialiser("plan_introduction")
 initialiser("plan_developpement")
 initialiser("plan_conclusion")
 initialiser("plan_repartition")
 initialiser("feedback_plan")
 
-# Rédaction commune
 initialiser("introduction")
 initialiser("feedback_introduction")
 
@@ -724,18 +688,15 @@ initialiser("feedback_developpement")
 initialiser("conclusion")
 initialiser("feedback_conclusion")
 
-# Références guidées
 initialiser("ref_auteur")
 initialiser("ref_titre")
 initialiser("ref_media")
 initialiser("ref_date")
 
-# Sources libres
 initialiser("libre_references")
 
 initialiser("feedback_references")
 
-# Final
 initialiser("chronique")
 initialiser("feedback_final")
 
@@ -2200,39 +2161,179 @@ de structure, de description et de transitions.
 
 Ne transforme pas cette liberté en obligation.
 
-IMPORTANT :
+=========================================================
+RÈGLE ESSENTIELLE : PLAN ET NIVEAU DE DÉTAIL
+=========================================================
+
+Le niveau de détail exigé dans le développement
+doit être déterminé par le PLAN DE L'ÉLÈVE,
+et non par la quantité d'informations disponibles
+dans la source.
 
 Le mot « comment » dans un plan
-ne signifie pas automatiquement
+ne signifie PAS automatiquement
 « décrire toute la procédure technique ».
 
-Une explication du principe peut suffire.
+Si le plan dit seulement qu'il faut expliquer
+comment un traitement, un dispositif ou un phénomène fonctionne,
+une explication correcte de son PRINCIPE suffit.
+
+Tu ne dois PAS exiger les détails techniques présents
+dans la source, tels que :
+
+- les instruments utilisés ;
+- le matériel utilisé ;
+- les gestes techniques ;
+- toutes les étapes d'une procédure ;
+- les modalités précises d'implantation ;
+- la manière exacte dont un dispositif est guidé ;
+- les détails opératoires ;
+
+SAUF si le plan de l'élève prévoit explicitement
+de présenter ces détails.
+
+=========================================================
+EXEMPLE OBLIGATOIRE DE RAISONNEMENT
+=========================================================
+
+Supposons que la source explique précisément
+avec quels instruments des bâtonnets contenant du radium 224
+sont introduits et guidés dans une tumeur.
+
+Si le plan prévoit simplement :
+
+« Expliquer comment les bâtonnets contenant du radium 224
+sont placés dans la tumeur. »
+
+et que l'élève écrit :
+
+« Des bâtonnets contenant du radium 224
+sont placés directement dans la tumeur. »
+
+tu ne dois PAS lui demander :
+- avec quels instruments ils sont introduits ;
+- comment ils sont guidés ;
+- comment ils sont répartis dans la tumeur ;
+- de décrire la procédure d'implantation.
+
+Ces précisions existent peut-être dans la source,
+mais elles ne sont PAS exigées par ce plan.
+
+En revanche, si le plan disait explicitement :
+
+« Expliquer avec quels instruments les bâtonnets
+sont introduits et comment ils sont positionnés
+à différents endroits de la tumeur »,
+
+alors ces informations devraient effectivement
+apparaître dans le développement.
+
+=========================================================
+DISTINGUER INFORMATION PRÉVUE ET DÉTAIL SUPPLÉMENTAIRE
+=========================================================
+
+Avant de demander une précision absente,
+pose-toi obligatoirement cette question :
+
+« Cette information est-elle explicitement prévue par le plan,
+ou est-ce seulement un détail supplémentaire présent
+dans la source ? »
+
+Si c'est seulement un détail supplémentaire :
+NE LE DEMANDE PAS.
+
+Si l'information est explicitement prévue par le plan :
+tu peux demander à l'élève de la compléter.
+
+EXEMPLE :
+
+Si le plan prévoit :
+
+« Présenter le caractère expérimental du traitement
+et le temps nécessaire pour connaître son efficacité »
+
+mais que le développement dit seulement :
+
+« Cette technique est encore expérimentale »,
+
+alors le délai prévu par le plan manque réellement.
+
+Dans ce cas, tu peux demander à l'élève
+de retrouver ce délai dans la source.
+
+Cette situation est différente
+d'un détail technique non prévu dans le plan.
+
+=========================================================
+RÈGLE D'ARRÊT
+=========================================================
+
+Si toutes les idées prévues dans le plan sont :
+
+- présentes ;
+- fidèles à la source ;
+- suffisamment compréhensibles pour le niveau de l'élève ;
+
+tu DOIS valider le développement.
+
+Tu ne dois PAS chercher ensuite
+une nouvelle précision à demander.
+
+Tu ne dois PAS demander :
+- un chiffre ;
+- un exemple ;
+- un instrument ;
+- une étape ;
+- un détail technique ;
+- une précision supplémentaire ;
+
+simplement parce que cette information existe
+dans la source.
+
+Si tu constates toi-même dans ton analyse que :
+
+« toutes les idées du plan sont présentes
+et les informations sont fidèles »,
+
+tu ne peux PAS ensuite refuser le développement
+pour l'absence d'un détail qui n'était pas explicitement
+demandé dans le plan.
+
+Dans ce cas :
+TU DOIS VALIDER.
+
+=========================================================
+NIVEAU
+=========================================================
 
 Pour 6e-5e :
 quelques informations simples et exactes peuvent suffire.
 
 Pour 4e-3e :
-attends davantage de précision et d'explication.
+attends davantage de précision et d'explication,
+mais toujours dans les limites de ce que prévoit le plan.
 
-RÈGLE D'ARRÊT :
+Le niveau 4e-3e ne justifie PAS
+d'exiger automatiquement tous les détails techniques
+présents dans la source.
 
-Si toutes les idées prévues sont présentes,
-fidèles et suffisamment expliquées,
-tu DOIS valider.
-
-Ne demande pas ensuite un chiffre,
-un exemple, un instrument,
-une étape ou un détail simplement
-parce qu'il existe dans les recherches.
-
-IMPORTANT :
+=========================================================
+DIALOGUE AVEC LE COACH
+=========================================================
 
 Ne valide pas comme texte radiophonique
 une phrase manifestement adressée au Coach,
 par exemple :
+
 « oui, je confirme... »
+
 ou
+
 « non, je voulais dire... ».
+
+=========================================================
+VALIDATION
+=========================================================
 
 Si le développement est suffisant, réponds exactement :
 
@@ -3040,22 +3141,6 @@ signale une répétition si deux passages disent pratiquement
 la même chose avec le même niveau de détail,
 sans apporter de nouvelle information,
 et que cela rend la chronique manifestement redondante.
-
-Exemple de problème :
-
-INTRODUCTION :
-« Les 6e découvrent plusieurs professeurs
-et changent de salle. »
-
-Puis DÉVELOPPEMENT :
-« Les 6e découvrent plusieurs professeurs
-et les changements de salle. »
-
-si les deux passages développent réellement
-la même information de façon répétitive
-et qu'aucun des deux n'apporte une fonction différente.
-
-Mais reste proportionné :
 
 Pour un élève de 6e-5e,
 une petite répétition de vocabulaire ou d'idée est acceptable.
