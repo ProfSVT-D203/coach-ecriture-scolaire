@@ -34,6 +34,18 @@ if "vocabulaire" not in st.session_state:
 if "feedback_comprehension" not in st.session_state:
     st.session_state.feedback_comprehension = ""
 
+if "plan_introduction" not in st.session_state:
+    st.session_state.plan_introduction = ""
+
+if "plan_developpement" not in st.session_state:
+    st.session_state.plan_developpement = ""
+
+if "plan_conclusion" not in st.session_state:
+    st.session_state.plan_conclusion = ""
+
+if "plan_repartition" not in st.session_state:
+    st.session_state.plan_repartition = ""
+
 
 # =========================================================
 # TITRE
@@ -144,8 +156,6 @@ elif st.session_state.etape == "comprehension":
             st.session_state.sujet = sujet
             st.session_state.idees = idees
             st.session_state.vocabulaire = vocabulaire
-
-            # Une modification des réponses annule l'ancienne analyse.
             st.session_state.feedback_comprehension = ""
 
             st.session_state.etape = "analyse_comprehension"
@@ -332,7 +342,6 @@ RÉPONSE DE L'ÉLÈVE — MOTS OU PASSAGES DIFFICILES :
 
         feedback = st.session_state.feedback_comprehension
 
-        # Affichage plus propre en cas de validation
         if feedback.startswith("COMPRÉHENSION VALIDÉE"):
 
             st.success("✅ Compréhension validée")
@@ -345,6 +354,10 @@ RÉPONSE DE L'ÉLÈVE — MOTS OU PASSAGES DIFFICILES :
                 "**Étape suivante : construire le plan.**"
             )
 
+            if st.button("Construire mon plan"):
+                st.session_state.etape = "plan"
+                st.rerun()
+
         else:
 
             st.write(feedback)
@@ -356,3 +369,148 @@ RÉPONSE DE L'ÉLÈVE — MOTS OU PASSAGES DIFFICILES :
             if st.button("Reprendre mes réponses"):
                 st.session_state.etape = "comprehension"
                 st.rerun()
+
+
+# =========================================================
+# ÉTAPE 3 — CONSTRUCTION DU PLAN
+# =========================================================
+
+elif st.session_state.etape == "plan":
+
+    st.subheader("Étape 2 — Construire le plan")
+
+    st.write(
+        "Avant d'écrire la chronique, organise les idées que tu veux présenter."
+    )
+
+    st.write(
+        "Le plan indique ce que chaque partie doit expliquer. "
+        "Tu n'as pas encore besoin d'écrire les phrases de la chronique."
+    )
+
+    st.divider()
+
+    st.write(
+        f"**Niveau :** {st.session_state.niveau}  \n"
+        f"**Format :** {st.session_state.nombre_voix}"
+    )
+
+    st.divider()
+
+    plan_introduction = st.text_area(
+        "Introduction — Que veux-tu présenter au début de la chronique ?",
+        value=st.session_state.plan_introduction,
+        height=100
+    )
+
+    plan_developpement = st.text_area(
+        "Développement — Quelles idées veux-tu expliquer, et dans quel ordre ?",
+        value=st.session_state.plan_developpement,
+        height=180
+    )
+
+    plan_conclusion = st.text_area(
+        "Conclusion — Sur quelle idée veux-tu terminer la chronique ?",
+        value=st.session_state.plan_conclusion,
+        height=100
+    )
+
+    if st.session_state.nombre_voix in ["2 voix", "3 voix"]:
+
+        st.divider()
+
+        if st.session_state.nombre_voix == "2 voix":
+            texte_repartition = (
+                "Répartition des 2 voix — "
+                "Comment allez-vous répartir les différentes parties "
+                "entre la voix 1 et la voix 2 ?"
+            )
+        else:
+            texte_repartition = (
+                "Répartition des 3 voix — "
+                "Comment allez-vous répartir les différentes parties "
+                "entre les voix 1, 2 et 3 ?"
+            )
+
+        plan_repartition = st.text_area(
+            texte_repartition,
+            value=st.session_state.plan_repartition,
+            height=150
+        )
+
+    else:
+        plan_repartition = ""
+
+    st.divider()
+
+    if st.button("Enregistrer mon plan"):
+
+        if plan_introduction.strip() == "":
+            st.warning(
+                "Indique ce que tu veux présenter dans l'introduction."
+            )
+
+        elif plan_developpement.strip() == "":
+            st.warning(
+                "Indique les idées que tu veux expliquer dans le développement."
+            )
+
+        elif plan_conclusion.strip() == "":
+            st.warning(
+                "Indique sur quelle idée tu veux terminer."
+            )
+
+        elif (
+            st.session_state.nombre_voix in ["2 voix", "3 voix"]
+            and plan_repartition.strip() == ""
+        ):
+            st.warning(
+                "Indique comment les prises de parole seront réparties."
+            )
+
+        else:
+            st.session_state.plan_introduction = plan_introduction
+            st.session_state.plan_developpement = plan_developpement
+            st.session_state.plan_conclusion = plan_conclusion
+            st.session_state.plan_repartition = plan_repartition
+
+            st.session_state.etape = "plan_enregistre"
+
+            st.rerun()
+
+
+# =========================================================
+# ÉTAPE 4 — PLAN ENREGISTRÉ
+# =========================================================
+
+elif st.session_state.etape == "plan_enregistre":
+
+    st.subheader("Plan enregistré")
+
+    st.success(
+        "Ton plan a bien été enregistré."
+    )
+
+    st.write("### Introduction")
+    st.write(st.session_state.plan_introduction)
+
+    st.write("### Développement")
+    st.write(st.session_state.plan_developpement)
+
+    st.write("### Conclusion")
+    st.write(st.session_state.plan_conclusion)
+
+    if st.session_state.nombre_voix in ["2 voix", "3 voix"]:
+
+        st.write("### Répartition des voix")
+        st.write(st.session_state.plan_repartition)
+
+    st.divider()
+
+    st.info(
+        "La prochaine étape sera la vérification du plan par le Coach."
+    )
+
+    if st.button("Modifier mon plan"):
+        st.session_state.etape = "plan"
+        st.rerun()
