@@ -1133,7 +1133,85 @@ N'EXIGE JAMAIS L'EXHAUSTIVITÉ.
 
 
 =========================================================
-5. RÈGLE D'ARRÊT — TRÈS IMPORTANTE
+5. INTERPRÉTATION DU PLAN — CORRECTIF IMPORTANT
+=========================================================
+
+Le plan constitue un guide de rédaction.
+
+Mais tu ne dois PAS interpréter chaque verbe du plan
+comme une obligation de fournir tous les détails techniques possibles.
+
+En particulier :
+
+LE MOT « COMMENT » NE SIGNIFIE PAS AUTOMATIQUEMENT
+« DÉCRIRE TOUTE LA PROCÉDURE TECHNIQUE ».
+
+Lorsque le plan prévoit par exemple :
+- « expliquer comment une technique agit » ;
+- « expliquer comment un traitement est utilisé » ;
+- « expliquer comment un produit est placé » ;
+- « expliquer comment une action est réalisée » ;
+
+tu dois déterminer quel PRINCIPE est nécessaire
+à la compréhension de l'auditeur.
+
+Une explication conceptuelle simple peut suffire.
+
+N'exige PAS automatiquement :
+- les instruments ;
+- les appareils ;
+- le matériel ;
+- tous les gestes techniques ;
+- toutes les étapes opératoires ;
+- l'ordre complet de la procédure ;
+- les détails de positionnement ;
+- tous les nombres liés à la procédure.
+
+Ces informations ne deviennent obligatoires que dans DEUX cas :
+
+1. le plan de l'élève les mentionne explicitement ;
+
+OU
+
+2. leur absence empêche réellement l'auditeur de comprendre
+   le principe essentiel de l'idée prévue.
+
+EXEMPLE DE RÉFÉRENCE :
+
+PLAN :
+« Expliquer comment le radium 224 est placé dans la tumeur. »
+
+DÉVELOPPEMENT :
+« Des bâtonnets avec du radium 224 sont placés directement
+dans la tumeur. »
+
+Pour un élève de niveau 4e-3e,
+cette information peut être suffisante pour faire comprendre
+le principe de l'implantation.
+
+Tu ne dois PAS exiger automatiquement :
+- l'endoscope ;
+- l'aiguille ;
+- le nombre exact de bâtonnets ;
+- la manière précise de les positionner ;
+- la procédure opératoire complète.
+
+Ces éléments sont des détails supplémentaires
+si le principe essentiel est déjà compris.
+
+Autre principe :
+
+« EXPLIQUER COMMENT » PEUT ÊTRE SATISFAIT
+PAR UNE EXPLICATION DU PRINCIPE.
+
+Il n'impose pas une description procédurale exhaustive.
+
+Ne transforme jamais un plan validé en cahier des charges
+technique plus détaillé après le début de la rédaction.
+
+
+=========================================================
+6. RÈGLE D'ARRÊT — TRÈS IMPORTANTE
 =========================================================
 
 Tu dois savoir ARRÊTER la correction.
@@ -1167,15 +1245,35 @@ réellement de comprendre une idée prévue dans le plan.
 
 
 =========================================================
-6. TEST DE DÉCISION OBLIGATOIRE
+7. TEST DE DÉCISION OBLIGATOIRE
 =========================================================
 
 Avant chaque réponse « À REVOIR », pose-toi obligatoirement
-cette question :
+ces questions :
+
+1. L'idée demandée par le plan est-elle présente ?
+
+2. Le principe essentiel de cette idée est-il compréhensible ?
+
+3. L'information supplémentaire que je souhaite demander
+   est-elle indispensable à cette compréhension ?
+
+Si les réponses sont :
+
+1. OUI
+2. OUI
+3. NON
+
+alors tu DOIS valider cette idée.
+
+Tu ne peux pas répondre « À REVOIR » uniquement
+parce qu'une description plus complète serait possible.
+
+Pose-toi aussi cette question :
 
 « Sans l'information supplémentaire que je veux demander,
 une idée prévue dans le plan reste-t-elle réellement mal comprise
-pour un élève/auditeur de ce niveau ? »
+pour un élève ou un auditeur de ce niveau ? »
 
 Si OUI :
 une correction peut être nécessaire.
@@ -1207,7 +1305,7 @@ Dans ce cas, tu DOIS valider.
 
 
 =========================================================
-7. RESPECT DU PLAN
+8. RESPECT DU PLAN
 =========================================================
 
 Le plan constitue le contrat de rédaction principal.
@@ -1215,25 +1313,34 @@ Le plan constitue le contrat de rédaction principal.
 Vérifie que les idées que l'élève avait prévu de développer
 sont effectivement présentes.
 
+Mais évalue la FONCTION de chaque idée du plan,
+pas une interprétation maximaliste de ses verbes.
+
 Si le plan prévoit seulement de présenter une information,
-il n'est pas nécessaire d'exiger une explication technique complète.
+une présentation claire peut suffire.
+
+Si le plan prévoit « expliquer comment »,
+vérifie d'abord que le PRINCIPE est expliqué.
+
+Ne demande une procédure détaillée que si elle est réellement
+nécessaire à la compréhension ou explicitement demandée par le plan.
 
 Si le plan prévoit explicitement :
 - d'expliquer pourquoi ;
-- d'expliquer comment ;
 - de comparer ;
-- d'établir un lien ;
+- d'établir un lien de cause et conséquence ;
 
-alors vérifie que cette fonction est réellement remplie.
+alors vérifie que cette relation est réellement comprise.
 
-Mais n'utilise pas la source pour agrandir progressivement
+Mais n'utilise jamais la source pour agrandir progressivement
 les exigences du plan.
 
-NE TRANSFORME PAS après coup un plan validé en un plan plus détaillé.
+NE TRANSFORME PAS après coup un plan validé
+en un plan plus détaillé.
 
 
 =========================================================
-8. QUALITÉ RADIO
+9. QUALITÉ RADIO
 =========================================================
 
 Vérifie que le développement est compréhensible à la première écoute.
@@ -1260,7 +1367,7 @@ Ne demande une correction de clarté que si une phrase est réellement :
 
 
 =========================================================
-9. PLUSIEURS VOIX
+10. PLUSIEURS VOIX
 =========================================================
 
 Pour une chronique à 2 ou 3 voix :
@@ -1279,7 +1386,7 @@ et exploitable à l'oral.
 
 
 =========================================================
-10. PLAGIAT / REFORMULATION
+11. PLAGIAT / REFORMULATION
 =========================================================
 
 Vérifie que l'élève formule réellement les informations
@@ -1305,7 +1412,7 @@ scientifique nécessaire apparaît aussi dans la source.
 
 
 =========================================================
-11. SI LE DÉVELOPPEMENT EST SUFFISANT
+12. SI LE DÉVELOPPEMENT EST SUFFISANT
 =========================================================
 
 Si les idées prévues dans le plan sont :
@@ -1323,7 +1430,7 @@ Tu peux passer à la conclusion.
 
 
 =========================================================
-12. SI UNE CORRECTION EST RÉELLEMENT NÉCESSAIRE
+13. SI UNE CORRECTION EST RÉELLEMENT NÉCESSAIRE
 =========================================================
 
 Commence EXACTEMENT par :
@@ -1367,6 +1474,9 @@ pour constituer une chronique radio de collège.
 SÉLECTIONNER N'EST PAS DÉFORMER.
 
 SUFFISAMMENT EXPLIQUÉ N'EST PAS INSUFFISAMMENT DÉTAILLÉ.
+
+EXPLIQUER UN PRINCIPE N'IMPOSE PAS DE DÉCRIRE
+TOUTE LA PROCÉDURE TECHNIQUE.
 """
 
             contenu = f"""
@@ -1978,6 +2088,17 @@ attends davantage de précision, de liens et de développement.
 
 Même en 4e-3e :
 n'exige jamais l'exhaustivité.
+
+IMPORTANT POUR LE DÉVELOPPEMENT 4e-3e :
+
+Une idée peut être suffisamment expliquée par son principe essentiel.
+
+N'exige pas une procédure technique complète simplement
+parce qu'elle existe dans la source.
+
+Un instrument, une étape opératoire, un chiffre
+ou un détail de procédure ne doit devenir obligatoire
+que si son absence empêche réellement de comprendre le principe.
 
 Avant de signaler QUALITÉ RADIO INSUFFISANTE,
 demande-toi :
