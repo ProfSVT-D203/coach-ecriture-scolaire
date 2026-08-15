@@ -1,4 +1,5 @@
 import streamlit as st
+from openai import OpenAI
 
 st.set_page_config(
     page_title="Coach d'écriture Radio ISTJ",
@@ -180,3 +181,25 @@ elif st.session_state.etape == "analyse_comprehension":
     if st.button("Modifier mes réponses"):
         st.session_state.etape = "comprehension"
         st.rerun()
+    st.divider()
+
+    if st.button("Tester la connexion OpenAI"):
+
+        try:
+            client = OpenAI(
+                api_key=st.secrets["OPENAI_API_KEY"]
+            )
+
+            response = client.responses.create(
+                model="gpt-5-mini",
+                input=(
+                    "Réponds uniquement par cette phrase : "
+                    "Connexion API réussie."
+                )
+            )
+
+            st.success(response.output_text)
+
+        except Exception as e:
+            st.error("La connexion à OpenAI a échoué.")
+            st.code(str(e))
