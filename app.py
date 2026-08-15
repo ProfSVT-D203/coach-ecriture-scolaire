@@ -95,17 +95,22 @@ def references_affichees():
 
 
 def assembler_chronique():
+    """
+    Assemble uniquement le texte destiné à être lu à l'antenne.
+
+    Les références / sources ne sont PAS ajoutées à la chronique orale.
+    Elles restent stockées séparément et apparaissent dans le PDF.
+    """
 
     parties = [
         st.session_state.introduction.strip(),
         st.session_state.developpement.strip(),
         st.session_state.conclusion.strip(),
-        "",
-        "Références :",
-        references_affichees(),
     ]
 
-    return "\n\n".join(parties)
+    return "\n\n".join(
+        partie for partie in parties if partie
+    )
 
 
 def invalider_apres(partie):
@@ -158,6 +163,10 @@ def afficher_sidebar_libre():
 
         st.header("📻 Mémo écriture radio")
 
+        # -------------------------------------------------
+        # THÈME / SUJET / ANGLE
+        # -------------------------------------------------
+
         if etape in [
             "libre_cadrage",
             "libre_angle_verif"
@@ -205,6 +214,10 @@ Les principaux changements de la rentrée 2026 dans notre collège
             st.info(
                 "Un même sujet peut avoir plusieurs angles."
             )
+
+        # -------------------------------------------------
+        # RECHERCHES / 5W
+        # -------------------------------------------------
 
         elif etape in [
             "libre_recherches",
@@ -257,6 +270,10 @@ Que faut-il faire comprendre ?
                 "Toutes ces questions ne sont pas forcément utiles "
                 "pour chaque chronique."
             )
+
+        # -------------------------------------------------
+        # PLAN ET RÉDACTION
+        # -------------------------------------------------
 
         elif etape in [
             "plan",
@@ -322,6 +339,10 @@ Ces éléments sont des possibilités, pas des obligations.
 """
             )
 
+        # -------------------------------------------------
+        # SOURCES
+        # -------------------------------------------------
+
         elif etape in [
             "references",
             "controle_references"
@@ -366,6 +387,10 @@ Pour un article ou un site, indique si possible :
                     st.session_state.libre_angle
                 )
 
+        # -------------------------------------------------
+        # ASSEMBLAGE / CONTRÔLE FINAL
+        # -------------------------------------------------
+
         elif etape in [
             "chronique_assemblee",
             "controle_final"
@@ -386,6 +411,8 @@ Ta chronique doit être :
 **✓ écrite avec tes propres phrases**
 
 **✓ courte et concise**
+
+**✓ sans phrases adressées au Coach**
 """
             )
 
@@ -530,6 +557,10 @@ def generer_pdf():
 
     elements = []
 
+    # -----------------------------------------------------
+    # EN-TÊTE
+    # -----------------------------------------------------
+
     elements.append(
         Paragraph(
             "RADIO ISTJ",
@@ -575,6 +606,10 @@ def generer_pdf():
 
     elements.append(Spacer(1, 0.2 * cm))
 
+    # -----------------------------------------------------
+    # CHRONIQUE ORALE
+    # -----------------------------------------------------
+
     elements.append(
         Paragraph(
             "Chronique",
@@ -604,6 +639,10 @@ def generer_pdf():
     )
 
     elements.append(Spacer(1, 0.35 * cm))
+
+    # -----------------------------------------------------
+    # SOURCES / RÉFÉRENCES — NON LUES À L'ANTENNE
+    # -----------------------------------------------------
 
     bloc_references = [
         Paragraph(
@@ -731,7 +770,34 @@ Tu peux :
 - rappeler une règle d'écriture radio ;
 - donner quelques mots-clés si nécessaire.
 
-RÈGLES RADIO À UTILISER COMME RÉFÉRENTIEL :
+=========================================================
+DISTINGUER CHRONIQUE ET DIALOGUE AVEC LE COACH
+=========================================================
+
+Le texte de la chronique doit contenir uniquement
+ce qui est destiné à être dit à l'antenne.
+
+Une phrase ajoutée uniquement pour répondre
+à une question du Coach ne fait PAS partie de la chronique.
+
+Exemples de phrases de dialogue avec le Coach :
+
+- « Oui, je confirme que... »
+- « Non, je voulais dire que... »
+- « Comme je l'ai expliqué... »
+- « Je confirme bien que... »
+- « Oui c'est exact... »
+
+Si une telle phrase apparaît dans le texte destiné à l'antenne,
+elle doit être retirée ou transformée PAR L'ÉLÈVE
+en véritable phrase de chronique si l'information est utile.
+
+Tu ne dois jamais considérer une réponse métadiscursive
+adressée au Coach comme une phrase radiophonique normale.
+
+=========================================================
+RÈGLES RADIO
+=========================================================
 
 COURT :
 - privilégier les phrases courtes ;
@@ -756,7 +822,32 @@ NE TRANSFORME PAS ces conseils en grille rigide.
 
 Une chronique simple mais claire peut être excellente.
 
-FIDÉLITÉ :
+=========================================================
+RÉPÉTITIONS
+=========================================================
+
+Une même idée peut naturellement être :
+- annoncée brièvement dans l'introduction ;
+- développée ensuite ;
+- rappelée brièvement dans la conclusion.
+
+Ce n'est PAS automatiquement une mauvaise répétition.
+
+En revanche, une répétition devient gênante
+si deux passages successifs ou proches disent pratiquement
+la même chose avec presque le même niveau de détail
+et n'apportent rien de nouveau.
+
+Ne cherche pas à supprimer toute répétition.
+
+Signale uniquement les répétitions réellement lourdes
+qui rendent la chronique inutilement longue
+ou donnent l'impression que le même passage est dit deux fois.
+
+=========================================================
+FIDÉLITÉ
+=========================================================
+
 Tu travailles uniquement à partir des documents et recherches
 fournis par l'élève dans l'application.
 
@@ -766,6 +857,10 @@ SÉLECTIONNER N'EST PAS DÉFORMER.
 
 Une chronique n'est jamais obligée de reprendre
 toutes les informations disponibles.
+
+=========================================================
+NIVEAUX
+=========================================================
 
 NIVEAU 6e-5e :
 - phrases simples acceptées ;
@@ -782,7 +877,10 @@ attends davantage :
 
 Mais jamais d'exhaustivité.
 
-SI UNE CORRECTION EST NÉCESSAIRE :
+=========================================================
+SI UNE CORRECTION EST NÉCESSAIRE
+=========================================================
+
 - commence par ce qui fonctionne ;
 - choisis UNE seule difficulté prioritaire ;
 - ne fournis pas la correction ;
@@ -953,6 +1051,7 @@ elif st.session_state.etape == "analyse_comprehension":
     st.write(st.session_state.vocabulaire)
 
     if st.button("Modifier mes réponses"):
+
         st.session_state.etape = "comprehension"
         st.rerun()
 
@@ -1919,6 +2018,13 @@ Pour 4e-3e :
 tu peux attendre davantage de contextualisation,
 mais l'introduction n'a pas à contenir le développement.
 
+IMPORTANT :
+
+Si le texte contient une phrase qui semble répondre directement
+au Coach plutôt qu'à l'auditeur,
+comme « oui je confirme », « non je voulais dire »,
+ne la considère pas comme une phrase normale de chronique.
+
 Si elle est suffisante, réponds exactement :
 
 INTRODUCTION VALIDÉE
@@ -2119,6 +2225,15 @@ un exemple, un instrument,
 une étape ou un détail simplement
 parce qu'il existe dans les recherches.
 
+IMPORTANT :
+
+Ne valide pas comme texte radiophonique
+une phrase manifestement adressée au Coach,
+par exemple :
+« oui, je confirme... »
+ou
+« non, je voulais dire... ».
+
 Si le développement est suffisant, réponds exactement :
 
 DÉVELOPPEMENT VALIDÉ
@@ -2284,12 +2399,38 @@ elle doit rester cohérente avec l'angle choisi.
 Ne demande pas une information supplémentaire
 simplement pour enrichir le texte.
 
+=========================================================
+ATTENTION AU DIALOGUE AVEC LE COACH
+=========================================================
+
+Le texte de conclusion doit contenir uniquement
+ce qui sera dit à l'auditeur.
+
+Une phrase comme :
+
+« Oui, je confirme bien que l'interview sera en direct »
+
+est une réponse adressée au Coach.
+
+Elle ne doit PAS être validée comme phrase de chronique.
+
+Si l'élève veut annoncer réellement
+que l'interview sera en direct,
+cette information doit apparaître naturellement
+dans une phrase destinée aux auditeurs.
+
+Ne rédige pas cette phrase à sa place.
+
 Si une information nouvelle concernant un événement futur
 apparaît dans la conclusion,
-tu peux demander à l'élève de la confirmer
-si elle n'apparaissait pas encore dans ses recherches.
+tu peux demander à l'élève de vérifier qu'elle est exacte.
 
-Ne considère pas automatiquement cette information comme fausse.
+Mais sa réponse de confirmation ne doit pas ensuite
+faire partie du texte destiné à l'antenne.
+
+=========================================================
+VALIDATION
+=========================================================
 
 Si elle est suffisante, réponds exactement :
 
@@ -2491,8 +2632,11 @@ elif st.session_state.etape == "references":
 elif st.session_state.etape == "controle_references":
 
     if st.session_state.parcours == "guide":
+
         st.subheader("Tes références")
+
     else:
+
         st.subheader("Tes sources utilisées")
 
     st.write(
@@ -2574,10 +2718,6 @@ N'exige PAS automatiquement :
 - l'heure ;
 - les noms des élèves ayant observé ;
 - les modalités de l'observation.
-
-Demande une précision seulement
-si l'absence de cette précision rend réellement
-la source impossible à comprendre.
 
 =========================================================
 INFORMATIONS INTERNES AU COLLÈGE
@@ -2731,8 +2871,11 @@ SOURCES / RÉFÉRENCES DONNÉES PAR L'ÉLÈVE :
         ):
 
             if st.session_state.parcours == "guide":
+
                 st.success("✅ Références validées")
+
             else:
+
                 st.success("✅ Sources validées")
 
             if st.button("Assembler ma chronique"):
@@ -2776,8 +2919,13 @@ elif st.session_state.etape == "chronique_assemblee":
         "avec les textes que tu as écrits."
     )
 
+    st.info(
+        "Les sources ne font pas partie du texte à lire à l'antenne. "
+        "Elles seront ajoutées séparément dans le PDF."
+    )
+
     st.text_area(
-        "Ta chronique complète :",
+        "Texte à lire à l'antenne :",
         value=st.session_state.chronique,
         height=460,
         disabled=True
@@ -2790,7 +2938,7 @@ elif st.session_state.etape == "chronique_assemblee":
 
 
 # =========================================================
-# CONTRÔLE FINAL
+# CONTRÔLE FINAL INDÉPENDANT
 # =========================================================
 
 elif st.session_state.etape == "controle_final":
@@ -2803,15 +2951,22 @@ elif st.session_state.etape == "controle_final":
 Tu réalises le CONTRÔLE FINAL INDÉPENDANT
 d'une chronique Radio ISTJ.
 
+Tu disposes séparément :
+- de l'introduction ;
+- du développement ;
+- de la conclusion ;
+- des sources / références ;
+- du texte complet destiné à l'antenne.
+
 Tu ne réécris rien.
 Tu ne cherches pas à améliorer le texte.
 
-Tu vérifies uniquement les problèmes qui rendent
-une correction réellement nécessaire.
+Tu détectes uniquement les problèmes
+qui rendent une correction réellement nécessaire.
 
-Vérifie :
-
+=========================================================
 1. FIDÉLITÉ
+=========================================================
 
 Toute information factuelle doit être justifiable
 par les documents, notes, observations ou recherches fournis.
@@ -2820,50 +2975,171 @@ SÉLECTIONNER N'EST PAS DÉFORMER.
 
 L'omission d'informations n'est pas une erreur.
 
+=========================================================
 2. INFORMATION INVENTÉE
+=========================================================
 
 Signale un fait qui n'apparaît pas dans les recherches
 et ne peut pas raisonnablement en être déduit.
 
+=========================================================
 3. EXACTITUDE
+=========================================================
 
-Vérifie les nombres, dates, lieux, noms et données présentes.
+Vérifie les nombres, dates, lieux, noms
+et autres données effectivement utilisées.
 
+L'absence d'un détail n'est pas une erreur
+simplement parce qu'il existe dans une source.
+
+=========================================================
 4. PLAGIAT
+=========================================================
 
-Les faits précis peuvent être identiques.
+Les faits précis peuvent naturellement être identiques
+à ceux de la source.
 
-Signale seulement une reprise vraiment trop proche
-d'une phrase ou construction de la source.
+Signale seulement une reprise vraiment trop proche :
+- phrase entière ou presque entière ;
+- même construction avec presque les mêmes mots ;
+- formulation clairement reconnaissable de la source.
 
+=========================================================
 5. CLARTÉ
+=========================================================
 
 Signale uniquement ce qui gêne réellement
 la compréhension à la première écoute.
 
-6. QUALITÉ RADIO
-
-Utilise un seuil minimal :
-court, clair, concis.
-
 Une phrase simple ou scolaire n'est pas un problème
 si elle reste compréhensible.
+
+=========================================================
+6. RÉPÉTITIONS ENTRE LES PARTIES
+=========================================================
+
+Compare explicitement :
+
+- INTRODUCTION ;
+- DÉVELOPPEMENT ;
+- CONCLUSION.
+
+Une répétition légère peut être normale.
+
+Par exemple :
+- annoncer une idée dans l'introduction ;
+- la développer ensuite ;
+- la rappeler brièvement dans la conclusion
+
+est parfaitement acceptable.
+
+NE SIGNALE PAS cela.
+
+En revanche,
+signale une répétition si deux passages disent pratiquement
+la même chose avec le même niveau de détail,
+sans apporter de nouvelle information,
+et que cela rend la chronique manifestement redondante.
+
+Exemple de problème :
+
+INTRODUCTION :
+« Les 6e découvrent plusieurs professeurs
+et changent de salle. »
+
+Puis DÉVELOPPEMENT :
+« Les 6e découvrent plusieurs professeurs
+et les changements de salle. »
+
+si les deux passages développent réellement
+la même information de façon répétitive
+et qu'aucun des deux n'apporte une fonction différente.
+
+Mais reste proportionné :
+
+Pour un élève de 6e-5e,
+une petite répétition de vocabulaire ou d'idée est acceptable.
+
+Ne signale que les répétitions vraiment gênantes.
+
+=========================================================
+7. META-DIALOGUE AVEC LE COACH
+=========================================================
+
+C'est une vérification OBLIGATOIRE.
+
+Le texte destiné à l'antenne ne doit pas contenir
+des phrases qui ont manifestement été écrites
+uniquement pour répondre au Coach.
+
+Exemples :
+
+« Oui, je confirme que... »
+
+« Oui, je confirme bien que... »
+
+« Non, je voulais dire... »
+
+« Comme je te l'ai expliqué... »
+
+« Je confirme que cette interview sera en direct. »
+
+Une telle phrase est du META-DIALOGUE,
+pas une phrase destinée aux auditeurs.
+
+Si elle apparaît dans la chronique finale,
+tu dois la signaler.
+
+ATTENTION :
+
+Une information contenue dans cette phrase
+peut être parfaitement vraie.
+
+Le problème n'est alors PAS l'information elle-même.
+
+Le problème est que la phrase est formulée
+comme une réponse au Coach
+et non comme une phrase de chronique.
+
+L'élève doit lui-même retirer la phrase
+ou intégrer l'information naturellement
+dans son texte si elle est utile.
+
+Tu ne rédiges jamais cette nouvelle formulation à sa place.
+
+=========================================================
+8. QUALITÉ RADIO
+=========================================================
+
+Utilise un seuil minimal :
+
+COURT
+CLAIR
+CONCIS.
+
+Une chronique n'a pas à être parfaite.
 
 Dans le parcours libre :
 vérifie également que la chronique reste globalement
 cohérente avec l'angle choisi.
 
-Ne transforme pas les principes journalistiques
-en grille rigide.
-
-Une accroche spectaculaire, des images mentales
-ou un habillage sonore sont des possibilités,
+Une accroche spectaculaire,
+des images mentales
+ou un habillage sonore
+sont des possibilités,
 pas des obligations.
 
-7. SOURCES
+=========================================================
+9. SOURCES
+=========================================================
+
+Les sources sont transmises séparément.
+
+Elles ne font PAS partie du texte destiné à être lu à l'antenne.
 
 Dans le parcours libre,
 les sources peuvent être :
+
 - observation directe ;
 - information interne au collège ;
 - document ou site ;
@@ -2872,26 +3148,48 @@ les sources peuvent être :
 
 N'exige pas un référencement universitaire.
 
-En revanche,
-une interview seulement prévue
+Une interview seulement prévue
 ne doit pas être présentée comme une source déjà utilisée.
 
-8. NIVEAU
+=========================================================
+10. NIVEAU
+=========================================================
 
-6e-5e :
-accepte un texte simple et quelques idées essentielles.
+Pour 6e-5e :
 
-4e-3e :
-attends davantage de précision et d'explication,
+- accepte des phrases simples ;
+- accepte une organisation simple ;
+- accepte quelques idées essentielles ;
+- tolère de petites répétitions si elles ne gênent pas vraiment l'écoute.
+
+Pour 4e-3e :
+
+attends davantage :
+- de précision ;
+- de progression ;
+- de liens entre les idées ;
+
 sans exiger l'exhaustivité.
 
-Avant de signaler un problème demande-toi :
+=========================================================
+11. TEST DE DÉCISION
+=========================================================
 
-« Cette correction est-elle indispensable,
-ou rendrait-elle seulement la chronique meilleure ? »
+Avant de signaler chaque problème,
+demande-toi :
+
+« Cette correction est-elle indispensable
+pour rendre la chronique diffusable,
+ou rendrait-elle seulement le texte meilleur ? »
 
 Si elle rendrait seulement le texte meilleur :
 NE LA SIGNALE PAS.
+
+Ne cherche pas une chronique parfaite.
+
+=========================================================
+12. VALIDATION
+=========================================================
 
 Si aucune correction obligatoire ne subsiste,
 réponds EXACTEMENT :
@@ -2899,21 +3197,37 @@ réponds EXACTEMENT :
 VALIDÉ
 La chronique peut passer à l'étape suivante.
 
-Sinon commence EXACTEMENT par :
+=========================================================
+13. SI UNE CORRECTION EST NÉCESSAIRE
+=========================================================
+
+Commence EXACTEMENT par :
 
 À CORRIGER
 
-Puis utilise :
+Puis utilise ce format :
 
-Problème : [type]
+Problème : [INFORMATION NON FIDÈLE /
+INFORMATION INVENTÉE /
+CLARTÉ /
+PLAGIAT /
+RÉPÉTITION GÊNANTE /
+META-DIALOGUE /
+QUALITÉ RADIO INSUFFISANTE /
+SOURCE]
 
 Passage concerné : "[citation exacte]"
 
-Explication : [courte]
+Explication : [courte et compréhensible par un collégien]
 
-Consigne : [ce que l'élève doit corriger lui-même]
+Consigne : [ce que l'élève doit vérifier ou corriger lui-même]
 
 Ne rédige jamais la correction.
+
+Si plusieurs vrais problèmes subsistent,
+tu peux les signaler séparément.
+
+Ne mentionne pas les éléments corrects.
 """
 
         contenu = f"""
@@ -2929,7 +3243,37 @@ FORMAT :
 DOCUMENTS / RECHERCHES :
 {contexte_documentaire()}
 
-CHRONIQUE :
+ANGLE DU PARCOURS LIBRE :
+{st.session_state.libre_angle if st.session_state.parcours == "libre" else "Non applicable"}
+
+=========================================================
+INTRODUCTION
+=========================================================
+
+{st.session_state.introduction}
+
+=========================================================
+DÉVELOPPEMENT
+=========================================================
+
+{st.session_state.developpement}
+
+=========================================================
+CONCLUSION
+=========================================================
+
+{st.session_state.conclusion}
+
+=========================================================
+SOURCES / RÉFÉRENCES
+=========================================================
+
+{references_affichees()}
+
+=========================================================
+TEXTE COMPLET DESTINÉ À L'ANTENNE
+=========================================================
+
 {st.session_state.chronique}
 """
 
@@ -2968,10 +3312,15 @@ CHRONIQUE :
             )
 
             st.text_area(
-                "Chronique validée :",
+                "Texte validé à lire à l'antenne :",
                 value=st.session_state.chronique,
                 height=430,
                 disabled=True
+            )
+
+            st.caption(
+                "Les sources sont conservées séparément "
+                "et apparaîtront dans le PDF."
             )
 
             st.divider()
