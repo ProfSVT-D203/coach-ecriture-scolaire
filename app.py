@@ -46,6 +46,9 @@ if "plan_conclusion" not in st.session_state:
 if "plan_repartition" not in st.session_state:
     st.session_state.plan_repartition = ""
 
+if "feedback_plan" not in st.session_state:
+    st.session_state.feedback_plan = ""
+
 
 # =========================================================
 # TITRE
@@ -281,19 +284,6 @@ Puis respecte IMPÉRATIVEMENT ces règles :
 - ne propose pas de formulation corrigée ;
 - ne traite pas plusieurs problèmes à la fois.
 
-EXEMPLE DE COMPORTEMENT INTERDIT :
-"L'élève dit que les tissus sont abîmés, mais la source dit
-qu'ils sont épargnés. Relis la source : sont-ils touchés ou épargnés ?"
-
-Cet exemple est INTERDIT parce qu'il donne déjà la réponse.
-
-COMPORTEMENT ATTENDU :
-"La deuxième idée contient une erreur concernant l'effet du traitement
-sur les tissus autour de la tumeur.
-
-Relis le passage qui explique la portée des particules :
-que dit-il sur les tissus autour de la tumeur ?"
-
 L'objectif est que l'élève retrouve et formule lui-même la correction.
 """
 
@@ -474,13 +464,17 @@ elif st.session_state.etape == "plan":
             st.session_state.plan_conclusion = plan_conclusion
             st.session_state.plan_repartition = plan_repartition
 
+            # Si le plan est modifié, une ancienne validation
+            # ne doit pas être conservée.
+            st.session_state.feedback_plan = ""
+
             st.session_state.etape = "plan_enregistre"
 
             st.rerun()
 
 
 # =========================================================
-# ÉTAPE 4 — PLAN ENREGISTRÉ
+# ÉTAPE 4 — PLAN ENREGISTRÉ + VÉRIFICATION IA
 # =========================================================
 
 elif st.session_state.etape == "plan_enregistre":
@@ -507,10 +501,244 @@ elif st.session_state.etape == "plan_enregistre":
 
     st.divider()
 
-    st.info(
-        "La prochaine étape sera la vérification du plan par le Coach."
-    )
-
     if st.button("Modifier mon plan"):
         st.session_state.etape = "plan"
         st.rerun()
+
+    st.divider()
+
+    # -----------------------------------------------------
+    # LE PLAN N'A PAS ENCORE ÉTÉ VÉRIFIÉ
+    # -----------------------------------------------------
+
+    if st.session_state.feedback_plan == "":
+
+        st.info(
+            "La prochaine étape est la vérification du plan par le Coach."
+        )
+
+        if st.button("🤖 Faire vérifier mon plan par le Coach"):
+
+            try:
+
+                client = OpenAI(
+                    api_key=st.secrets["OPENAI_API_KEY"]
+                )
+
+                instructions_plan = """
+Tu es le Coach d'écriture pédagogique de Radio ISTJ.
+
+Tu vérifies UNIQUEMENT le PLAN préparé par un élève de collège
+avant la rédaction d'une chronique radio.
+
+RÈGLE ABSOLUE :
+Tu ne rédiges jamais la chronique à la place de l'élève.
+Tu ne transformes pas son plan en phrases prêtes à être utilisées.
+Tu ne proposes pas un nouveau plan complet à sa place.
+
+Le plan n'est PAS la chronique.
+Il peut être écrit sous forme de notes, de groupes de mots
+ou de phrases très simples.
+
+OBJECTIF :
+Vérifier si le plan permet à l'élève de commencer ensuite la rédaction.
+
+Le plan doit comporter :
+1. une introduction qui permet d'identifier suffisamment le sujet ;
+2. un développement organisé autour des idées que l'élève
+   a choisi de retenir ;
+3. une conclusion cohérente avec le sujet ;
+4. pour une chronique à plusieurs voix, une répartition
+   suffisamment claire des prises de parole.
+
+RÈGLE PRIORITAIRE :
+SÉLECTIONNER N'EST PAS DÉFORMER.
+
+Une chronique radio n'est pas un résumé exhaustif de la source.
+
+L'élève n'a PAS à reprendre toutes les informations de l'article.
+
+Si la source présente plusieurs causes, conséquences, exemples,
+résultats ou explications, l'élève peut n'en sélectionner qu'une partie,
+à condition que les informations retenues soient exactes
+et qu'il ne fasse pas croire qu'elles sont les seules.
+
+Ne demande donc PAS d'ajouter une information simplement parce que :
+- elle existe dans la source ;
+- elle apporterait davantage de détails ;
+- elle rendrait la chronique plus complète ;
+- elle permettrait d'utiliser un terme plus technique.
+
+FIDÉLITÉ :
+Une information du plan doit être signalée seulement si :
+- elle est fausse ;
+- elle déforme réellement la source ;
+- elle inverse une relation importante ;
+- elle affirme quelque chose que la source ne permet pas d'affirmer.
+
+INTRODUCTION :
+L'introduction doit permettre d'identifier suffisamment le sujet
+et de comprendre pourquoi il mérite une chronique.
+
+Pour un élève de 6e-5e :
+- une ou deux idées simples peuvent suffire ;
+- n'exige pas systématiquement une date ;
+- n'exige pas systématiquement un chiffre ;
+- n'exige pas systématiquement un lieu plus précis ;
+- n'exige pas systématiquement une cause ;
+- n'exige pas systématiquement un exemple ;
+- n'exige pas systématiquement un détail technique.
+
+Pour un élève de 4e-3e :
+- attends davantage de précision et d'organisation ;
+- mais n'exige jamais l'exhaustivité.
+
+DÉVELOPPEMENT :
+Vérifie surtout :
+- que les idées prévues sont compréhensibles ;
+- qu'elles sont compatibles avec la source ;
+- qu'il existe un ordre exploitable pour la rédaction.
+
+Ne demande pas d'ajouter toutes les idées importantes identifiées
+pendant l'étape de compréhension.
+L'élève reste libre de sélectionner les informations qu'il utilisera.
+
+CONCLUSION :
+Elle peut être courte.
+Elle doit simplement permettre de terminer la chronique
+de manière cohérente.
+
+Ne demande pas une ouverture artificielle ou une nouvelle information
+si la conclusion prévue remplit déjà cette fonction.
+
+PLUSIEURS VOIX :
+Pour 2 ou 3 voix, vérifie seulement que la répartition permet
+de comprendre qui intervient dans les différentes parties.
+
+N'exige pas une alternance parfaite entre les voix.
+N'exige pas que toutes les voix parlent exactement autant.
+N'exige pas encore les phrases du dialogue.
+
+SI LE PLAN EST SUFFISANT :
+Réponds exactement :
+
+PLAN VALIDÉ
+Ton plan est suffisamment clair et organisé.
+Tu peux commencer la rédaction de l'introduction.
+
+SI UNE CORRECTION EST RÉELLEMENT NÉCESSAIRE :
+Commence exactement par :
+
+À REVOIR
+
+Puis :
+
+- commence par dire brièvement ce qui fonctionne déjà ;
+- choisis UNE SEULE difficulté prioritaire ;
+- explique le type de problème sans écrire la correction ;
+- pose UNE SEULE question ciblée pour aider l'élève
+  à améliorer lui-même son plan ;
+- ne donne jamais un plan corrigé ;
+- ne donne jamais une phrase prête à copier ;
+- ne traite pas plusieurs problèmes à la fois.
+
+IMPORTANT :
+Un plan simple mais correct doit être validé.
+Ne surcorrige pas.
+"""
+
+                input_plan = f"""
+NIVEAU :
+{st.session_state.niveau}
+
+FORMAT :
+{st.session_state.nombre_voix}
+
+SOURCE :
+{st.session_state.source}
+
+COMPRÉHENSION DÉJÀ VALIDÉE PAR LE COACH :
+
+SUJET PRINCIPAL :
+{st.session_state.sujet}
+
+IDÉES IMPORTANTES RETENUES PAR L'ÉLÈVE :
+{st.session_state.idees}
+
+PLAN PROPOSÉ PAR L'ÉLÈVE :
+
+INTRODUCTION :
+{st.session_state.plan_introduction}
+
+DÉVELOPPEMENT :
+{st.session_state.plan_developpement}
+
+CONCLUSION :
+{st.session_state.plan_conclusion}
+
+RÉPARTITION DES VOIX :
+{st.session_state.plan_repartition}
+"""
+
+                with st.spinner(
+                    "Le Coach vérifie ton plan..."
+                ):
+
+                    response = client.responses.create(
+                        model="gpt-5.6-luna",
+                        instructions=instructions_plan,
+                        input=input_plan
+                    )
+
+                st.session_state.feedback_plan = (
+                    response.output_text
+                )
+
+                st.rerun()
+
+            except Exception as e:
+
+                st.error(
+                    "Une erreur s'est produite pendant la vérification du plan."
+                )
+
+                st.code(str(e))
+
+    # -----------------------------------------------------
+    # LE PLAN A ÉTÉ VÉRIFIÉ
+    # -----------------------------------------------------
+
+    else:
+
+        st.subheader("Retour du Coach")
+
+        feedback_plan = st.session_state.feedback_plan
+
+        if feedback_plan.startswith("PLAN VALIDÉ"):
+
+            st.success("✅ Plan validé")
+
+            st.write(
+                "Ton plan est suffisamment clair et organisé."
+            )
+
+            st.write(
+                "**Tu peux commencer la rédaction de l'introduction.**"
+            )
+
+            st.info(
+                "La rédaction de l'introduction sera ajoutée "
+                "à la prochaine étape du Coach."
+            )
+
+        else:
+
+            st.write(feedback_plan)
+
+            st.warning(
+                "Modifie ton plan avant de poursuivre."
+            )
+
+            if st.button("Reprendre mon plan"):
+                st.session_state.etape = "plan"
+                st.rerun()
