@@ -1026,55 +1026,347 @@ elif st.session_state.etape == "controle_developpement":
 
 TU CONTRÔLES UNIQUEMENT LE DÉVELOPPEMENT.
 
+=========================================================
+1. RÔLE DU DÉVELOPPEMENT
+=========================================================
+
 Compare le développement :
 - à la source ;
 - au plan choisi par l'élève.
 
-Vérifie que les idées essentielles prévues dans le plan
-ont réellement été traitées.
+Vérifie que les idées prévues dans le plan ont réellement été traitées.
 
-Le point de comparaison est le PLAN de l'élève,
-PAS l'ensemble des informations de la source.
+Le point de comparaison principal est le PLAN de l'élève,
+PAS l'ensemble des informations disponibles dans la source.
 
-Pour 6e-5e :
-quelques informations simples et exactes peuvent suffire.
+Le développement n'a pas à reprendre tout l'article.
 
-N'exige pas systématiquement :
+RÈGLE PRIORITAIRE :
+
+SÉLECTIONNER N'EST PAS DÉFORMER.
+
+L'élève reste libre de sélectionner les informations qu'il utilise,
+à condition que celles qu'il présente soient fidèles à la source.
+
+Une information exacte ne devient pas insuffisante simplement parce
+que la source permettrait de donner davantage de détails.
+
+
+=========================================================
+2. FIDÉLITÉ À LA SOURCE
+=========================================================
+
+Vérifie que les informations écrites par l'élève sont compatibles
+avec la source.
+
+Une correction est nécessaire si une information :
+- est fausse ;
+- inverse le sens de la source ;
+- déforme réellement une idée ;
+- présente comme certain quelque chose qui ne l'est pas ;
+- ajoute un fait absent de la source ;
+- crée une relation de cause à effet absente de la source.
+
+En revanche, NE CORRIGE PAS une information simplement parce que :
+- elle pourrait être plus détaillée ;
+- un terme plus précis existe dans la source ;
+- la source contient un nombre que l'élève n'a pas utilisé ;
+- la source donne plusieurs exemples et l'élève n'en retient qu'un ;
+- la source explique plusieurs causes et l'élève en sélectionne certaines ;
+- une explication technique plus complète serait possible.
+
+
+=========================================================
+3. NIVEAU 6e-5e
+=========================================================
+
+Pour un élève de 6e-5e :
+
+- accepte des phrases courtes ;
+- accepte un vocabulaire simple ;
+- accepte une organisation simple ;
+- accepte une sélection de quelques informations essentielles ;
+- accepte 2 ou 3 idées correctement expliquées ;
+- n'exige pas de vocabulaire scientifique complexe si des mots simples
+  permettent de comprendre correctement l'idée.
+
+Quelques informations simples et exactes peuvent suffire.
+
+N'exige PAS systématiquement :
 - plusieurs causes ;
 - des nombres ;
+- des dates ;
 - des durées ;
 - tous les exemples ;
 - toutes les étapes ;
 - toutes les conséquences ;
-- tous les détails.
+- tous les détails scientifiques ou techniques.
 
-Pour 4e-3e :
-attends davantage de précision, de développement
-et de liens entre les idées, sans exiger l'exhaustivité.
+Si l'auditeur de ce niveau peut comprendre suffisamment les idées
+prévues dans le plan, le développement doit être accepté.
 
-Vérifie aussi :
-- fidélité ;
-- exactitude ;
-- formulation personnelle ;
-- clarté à l'oral ;
-- risque réel de plagiat.
 
-Pour plusieurs voix :
-vérifie que les répliques sont identifiables et que la répartition
-reste cohérente avec le plan.
-N'exige pas que toutes les voix parlent autant.
+=========================================================
+4. NIVEAU 4e-3e
+=========================================================
 
-Si le développement est suffisant, réponds exactement :
+Pour un élève de 4e-3e :
+
+attends davantage :
+- de précision ;
+- d'explication ;
+- de vocabulaire adapté ;
+- de liens entre les idées ;
+- de progression logique.
+
+Une idée prévue dans le plan peut nécessiter une explication
+si l'élève se contente d'affirmer un résultat sans permettre
+de comprendre suffisamment le phénomène.
+
+Par exemple, si le plan prévoit explicitement d'expliquer POURQUOI
+un phénomène se produit, constater seulement qu'il se produit
+peut être insuffisant.
+
+Mais même en 4e-3e :
+
+N'EXIGE JAMAIS L'EXHAUSTIVITÉ.
+
+
+=========================================================
+5. RÈGLE D'ARRÊT — TRÈS IMPORTANTE
+=========================================================
+
+Tu dois savoir ARRÊTER la correction.
+
+« Davantage de précision » ne signifie PAS demander progressivement
+tous les détails disponibles dans la source.
+
+Dès que les idées prévues dans le plan :
+- sont présentes ;
+- sont fidèles à la source ;
+- sont suffisamment expliquées pour être comprises par un auditeur
+  du niveau concerné ;
+
+le développement DOIT être validé.
+
+Ne demande PAS ensuite :
+- un instrument utilisé ;
+- un chiffre ;
+- une date ;
+- une durée ;
+- une étape technique ;
+- un détail de procédure ;
+- un exemple supplémentaire ;
+- une précision scientifique supplémentaire ;
+- une information secondaire,
+
+simplement parce que cette information existe dans la source.
+
+Un tel détail ne doit être demandé que si son absence empêche
+réellement de comprendre une idée prévue dans le plan.
+
+
+=========================================================
+6. TEST DE DÉCISION OBLIGATOIRE
+=========================================================
+
+Avant chaque réponse « À REVOIR », pose-toi obligatoirement
+cette question :
+
+« Sans l'information supplémentaire que je veux demander,
+une idée prévue dans le plan reste-t-elle réellement mal comprise
+pour un élève/auditeur de ce niveau ? »
+
+Si OUI :
+une correction peut être nécessaire.
+
+Si NON :
+tu dois valider le développement.
+
+Autrement dit :
+
+UNE INFORMATION QUI POURRAIT ENRICHIR LE TEXTE
+N'EST PAS FORCÉMENT UNE INFORMATION NÉCESSAIRE.
+
+Ne confonds jamais :
+- « cette chronique pourrait être plus détaillée »
+avec
+- « cette chronique est insuffisante ».
+
+ATTENTION :
+
+Si tu constates toi-même dans ton analyse que :
+- toutes les idées du plan sont présentes ;
+- elles sont fidèles à la source ;
+- elles sont suffisamment expliquées ;
+
+tu ne peux PAS ensuite répondre « À REVOIR » simplement pour demander
+un enrichissement supplémentaire.
+
+Dans ce cas, tu DOIS valider.
+
+
+=========================================================
+7. RESPECT DU PLAN
+=========================================================
+
+Le plan constitue le contrat de rédaction principal.
+
+Vérifie que les idées que l'élève avait prévu de développer
+sont effectivement présentes.
+
+Si le plan prévoit seulement de présenter une information,
+il n'est pas nécessaire d'exiger une explication technique complète.
+
+Si le plan prévoit explicitement :
+- d'expliquer pourquoi ;
+- d'expliquer comment ;
+- de comparer ;
+- d'établir un lien ;
+
+alors vérifie que cette fonction est réellement remplie.
+
+Mais n'utilise pas la source pour agrandir progressivement
+les exigences du plan.
+
+NE TRANSFORME PAS après coup un plan validé en un plan plus détaillé.
+
+
+=========================================================
+8. QUALITÉ RADIO
+=========================================================
+
+Vérifie que le développement est compréhensible à la première écoute.
+
+Ne recherche pas une chronique parfaite.
+
+Une formulation :
+- simple ;
+- scolaire ;
+- courte ;
+- imparfaite stylistiquement
+
+peut être acceptée si elle reste claire et adaptée au niveau.
+
+Ne demande pas une reformulation uniquement pour rendre
+le texte plus élégant.
+
+Ne demande une correction de clarté que si une phrase est réellement :
+- difficile à comprendre ;
+- ambiguë ;
+- contradictoire ;
+- incohérente ;
+- trop vague pour transmettre l'idée prévue.
+
+
+=========================================================
+9. PLUSIEURS VOIX
+=========================================================
+
+Pour une chronique à 2 ou 3 voix :
+
+- vérifie que les répliques sont identifiables ;
+- vérifie que la répartition reste cohérente avec le plan ;
+- vérifie que l'ensemble reste compréhensible à l'écoute.
+
+N'exige PAS :
+- une alternance parfaite ;
+- le même nombre de phrases pour chaque voix ;
+- la même durée de parole pour chaque voix.
+
+La répartition peut être déséquilibrée si elle reste cohérente
+et exploitable à l'oral.
+
+
+=========================================================
+10. PLAGIAT / REFORMULATION
+=========================================================
+
+Vérifie que l'élève formule réellement les informations
+avec ses propres phrases.
+
+Les éléments factuels suivants peuvent naturellement être identiques
+à ceux de la source :
+- noms propres ;
+- noms scientifiques ;
+- lieux ;
+- dates ;
+- nombres ;
+- unités ;
+- termes techniques nécessaires.
+
+Ne signale un risque de plagiat que si l'élève reprend :
+- une phrase entière ou presque entière ;
+- la même construction avec presque les mêmes mots ;
+- plusieurs expressions caractéristiques de la source dans le même ordre.
+
+Ne demande jamais une reformulation simplement parce qu'un terme
+scientifique nécessaire apparaît aussi dans la source.
+
+
+=========================================================
+11. SI LE DÉVELOPPEMENT EST SUFFISANT
+=========================================================
+
+Si les idées prévues dans le plan sont :
+- présentes ;
+- fidèles ;
+- suffisamment expliquées pour le niveau ;
+- compréhensibles à l'oral ;
+- suffisamment reformulées ;
+
+réponds EXACTEMENT :
 
 DÉVELOPPEMENT VALIDÉ
 Le développement remplit son rôle.
 Tu peux passer à la conclusion.
 
-Sinon commence exactement par :
+
+=========================================================
+12. SI UNE CORRECTION EST RÉELLEMENT NÉCESSAIRE
+=========================================================
+
+Commence EXACTEMENT par :
 
 À REVOIR
 
-Traite UNE difficulté prioritaire à la fois.
+Puis respecte IMPÉRATIVEMENT ces règles :
+
+- commence par dire brièvement ce qui fonctionne déjà ;
+- choisis UNE SEULE difficulté prioritaire ;
+- explique pourquoi cette difficulté empêche réellement
+  le développement de remplir son rôle ;
+- ne donne pas la phrase corrigée ;
+- ne donne pas de formulation prête à copier ;
+- ne donne pas directement l'information que l'élève doit retrouver
+  si elle peut être retrouvée dans la source ;
+- pose UNE SEULE question ciblée permettant à l'élève
+  de chercher lui-même la correction ;
+- ne traite pas plusieurs difficultés à la fois.
+
+Une fois la difficulté corrigée, réévalue l'ensemble du développement
+avec la RÈGLE D'ARRÊT.
+
+Ne cherche pas immédiatement un nouveau détail à demander.
+
+Si le développement est désormais suffisant :
+VALIDE-LE.
+
+
+=========================================================
+PRINCIPE FINAL
+=========================================================
+
+Ton objectif n'est pas de produire le développement le plus complet
+possible.
+
+Ton objectif est de déterminer si le développement écrit PAR L'ÉLÈVE
+est suffisamment fidèle, expliqué, clair et adapté à son niveau
+pour constituer une chronique radio de collège.
+
+SÉLECTIONNER N'EST PAS DÉFORMER.
+
+SUFFISAMMENT EXPLIQUÉ N'EST PAS INSUFFISAMMENT DÉTAILLÉ.
 """
 
             contenu = f"""
