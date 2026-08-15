@@ -57,17 +57,53 @@ def est_valide(feedback, mot):
     return feedback.strip().startswith(mot)
 
 
+def contexte_documentaire():
+    """
+    Renvoie le corpus documentaire utilisé pour vérifier les faits.
+    """
+
+    if st.session_state.parcours == "guide":
+        return st.session_state.source
+
+    return f"""
+THÈME :
+{st.session_state.libre_theme}
+
+SUJET :
+{st.session_state.libre_sujet}
+
+ANGLE :
+{st.session_state.libre_angle}
+
+RECHERCHES / DOCUMENTS / NOTES :
+{st.session_state.libre_recherches}
+
+INFORMATIONS RETENUES PAR L'ÉLÈVE :
+{st.session_state.libre_infos}
+"""
+
+
+def references_affichees():
+    if st.session_state.parcours == "guide":
+        return (
+            f"Auteur : {st.session_state.ref_auteur.strip()}\n"
+            f"Titre : {st.session_state.ref_titre.strip()}\n"
+            f"Média : {st.session_state.ref_media.strip()}\n"
+            f"Date : {st.session_state.ref_date.strip()}"
+        )
+
+    return st.session_state.libre_references.strip()
+
+
 def assembler_chronique():
+
     parties = [
         st.session_state.introduction.strip(),
         st.session_state.developpement.strip(),
         st.session_state.conclusion.strip(),
         "",
         "Références :",
-        f"Auteur : {st.session_state.ref_auteur.strip()}",
-        f"Titre : {st.session_state.ref_titre.strip()}",
-        f"Média : {st.session_state.ref_media.strip()}",
-        f"Date : {st.session_state.ref_date.strip()}",
+        references_affichees(),
     ]
 
     return "\n\n".join(parties)
@@ -109,19 +145,13 @@ def invalider_apres(partie):
 
 
 # =========================================================
-# FONCTIONS PDF
+# PDF
 # =========================================================
 
 def texte_pdf(texte):
-    """
-    Protège le texte de l'élève pour ReportLab sans le réécrire.
-    Les retours à la ligne sont conservés.
-    """
 
     texte = str(texte)
 
-    # Quelques caractères susceptibles de poser problème
-    # avec les polices PDF standard.
     remplacements = {
         "\u202f": " ",
         "\u00a0": " ",
@@ -140,6 +170,7 @@ def texte_pdf(texte):
 
 
 def pied_de_page(canvas, doc):
+
     canvas.saveState()
 
     largeur, hauteur = A4
@@ -173,10 +204,6 @@ def pied_de_page(canvas, doc):
 
 
 def generer_pdf():
-    """
-    Génère le PDF à partir UNIQUEMENT des textes déjà validés
-    et stockés dans la session.
-    """
 
     buffer = io.BytesIO()
 
@@ -208,11 +235,11 @@ def generer_pdf():
         "SousTitre",
         parent=styles["Normal"],
         fontName="Helvetica",
-        fontSize=11,
+        fontSize=10.5,
         leading=14,
         alignment=TA_CENTER,
         textColor=colors.HexColor("#555555"),
-        spaceAfter=18
+        spaceAfter=16
     )
 
     style_section = ParagraphStyle(
@@ -247,10 +274,6 @@ def generer_pdf():
 
     elements = []
 
-    # -----------------------------------------------------
-    # EN-TÊTE
-    # -----------------------------------------------------
-
     elements.append(
         Paragraph(
             "RADIO ISTJ",
@@ -258,9 +281,15 @@ def generer_pdf():
         )
     )
 
+    parcours_pdf = (
+        "Parcours guidé"
+        if st.session_state.parcours == "guide"
+        else "Parcours libre"
+    )
+
     elements.append(
         Paragraph(
-            "Chronique élève - version validée",
+            f"Chronique élève - {parcours_pdf} - version validée",
             style_sous_titre
         )
     )
@@ -278,11 +307,16 @@ def generer_pdf():
         )
     )
 
-    elements.append(Spacer(1, 0.2 * cm))
+    if st.session_state.parcours == "libre":
 
-    # -----------------------------------------------------
-    # CHRONIQUE
-    # -----------------------------------------------------
+        elements.append(
+            Paragraph(
+                f"<b>Sujet :</b> {texte_pdf(st.session_state.libre_sujet)}",
+                style_sous_titre
+            )
+        )
+
+    elements.append(Spacer(1, 0.2 * cm))
 
     elements.append(
         Paragraph(
@@ -314,58 +348,20 @@ def generer_pdf():
 
     elements.append(Spacer(1, 0.35 * cm))
 
-    # -----------------------------------------------------
-    # RÉFÉRENCES
-    # -----------------------------------------------------
-
-    bloc_references = []
-
-    bloc_references.append(
+    bloc_references = [
         Paragraph(
             "Références",
             style_section
-        )
-    )
-
-    bloc_references.append(
+        ),
         Paragraph(
-            f"<b>Auteur :</b> "
-            f"{texte_pdf(st.session_state.ref_auteur)}",
+            texte_pdf(references_affichees()),
             style_reference
         )
-    )
-
-    bloc_references.append(
-        Paragraph(
-            f"<b>Titre :</b> "
-            f"{texte_pdf(st.session_state.ref_titre)}",
-            style_reference
-        )
-    )
-
-    bloc_references.append(
-        Paragraph(
-            f"<b>Média :</b> "
-            f"{texte_pdf(st.session_state.ref_media)}",
-            style_reference
-        )
-    )
-
-    bloc_references.append(
-        Paragraph(
-            f"<b>Date :</b> "
-            f"{texte_pdf(st.session_state.ref_date)}",
-            style_reference
-        )
-    )
+    ]
 
     elements.append(
         KeepTogether(bloc_references)
     )
-
-    # -----------------------------------------------------
-    # CRÉATION
-    # -----------------------------------------------------
 
     document.build(
         elements,
@@ -386,21 +382,41 @@ def generer_pdf():
 
 initialiser("etape", "accueil")
 
-initialiser("niveau", None)
-initialiser("nombre_voix", None)
-initialiser("source")
+initialiser("parcours", "")
+initialiser("niveau", "6e-5e")
+initialiser("nombre_voix", "1 voix")
 
+# Parcours guidé
+initialiser("source")
 initialiser("sujet")
 initialiser("idees")
 initialiser("vocabulaire")
 initialiser("feedback_comprehension")
 
+# Parcours libre
+initialiser("libre_theme")
+initialiser("libre_sujet")
+initialiser("libre_angle")
+initialiser("feedback_angle")
+
+initialiser("libre_recherches")
+initialiser("libre_infos")
+initialiser("feedback_recherches")
+
+initialiser("libre_what")
+initialiser("libre_who")
+initialiser("libre_where")
+initialiser("libre_when")
+initialiser("libre_whyhow")
+
+# Plan commun
 initialiser("plan_introduction")
 initialiser("plan_developpement")
 initialiser("plan_conclusion")
 initialiser("plan_repartition")
 initialiser("feedback_plan")
 
+# Rédaction commune
 initialiser("introduction")
 initialiser("feedback_introduction")
 
@@ -410,25 +426,31 @@ initialiser("feedback_developpement")
 initialiser("conclusion")
 initialiser("feedback_conclusion")
 
+# Références guidées
 initialiser("ref_auteur")
 initialiser("ref_titre")
 initialiser("ref_media")
 initialiser("ref_date")
+
+# Références libres
+initialiser("libre_references")
+
 initialiser("feedback_references")
 
+# Final
 initialiser("chronique")
 initialiser("feedback_final")
 
 
 # =========================================================
-# PROMPT COMMUN POUR LA RÉDACTION
+# RÈGLES COMMUNES DE RÉDACTION
 # =========================================================
 
 REGLES_REDACTION = """
 Tu es le Coach d'écriture pédagogique de Radio ISTJ.
 
-Tu accompagnes un élève de collège qui écrit lui-même une chronique radio
-à partir d'une source fournie.
+Tu accompagnes un élève de collège qui écrit lui-même
+une chronique destinée à être entendue à la radio.
 
 RÈGLE ABSOLUE :
 L'élève est l'auteur.
@@ -436,85 +458,80 @@ L'élève est l'auteur.
 Tu ne dois JAMAIS :
 - écrire une phrase de chronique à sa place ;
 - proposer une reformulation prête à copier ;
-- proposer une introduction modèle ;
-- proposer une conclusion modèle ;
+- écrire une introduction modèle ;
+- écrire une conclusion modèle ;
 - donner un début ou une fin de phrase ;
 - rédiger une transition ;
-- rédiger une réplique pour une voix ;
-- fournir une version améliorée du passage.
+- rédiger une réplique à sa place ;
+- fournir une version améliorée du texte.
 
-Tu peux seulement :
-- analyser ce que l'élève a écrit ;
-- signaler UNE difficulté réellement importante ;
-- poser UNE question ciblée ;
-- donner quelques mots-clés ou une indication de structure si nécessaire.
+Tu peux :
+- analyser ;
+- questionner ;
+- signaler UNE difficulté ;
+- rappeler une règle d'écriture radio ;
+- donner quelques mots-clés si nécessaire.
+
+RÈGLES RADIO À UTILISER COMME RÉFÉRENTIEL :
+
+COURT :
+- privilégier les phrases courtes ;
+- une phrase porte de préférence une idée.
+
+CLAIR :
+- le texte doit être compris à la première écoute ;
+- les liens logiques doivent rester compréhensibles.
+
+CONCIS :
+- utiliser des mots précis ;
+- éviter les détours inutiles.
+
+L'accroche doit donner envie d'écouter.
+
+L'écriture peut aussi être descriptive,
+créer des images mentales et penser aux sons,
+mais ces éléments ne sont jamais obligatoires
+dans toutes les chroniques.
+
+NE TRANSFORME PAS ces conseils en grille rigide.
+
+Une chronique simple mais claire peut être excellente.
 
 FIDÉLITÉ :
-Travaille uniquement avec la source fournie.
+Tu travailles uniquement à partir des documents et recherches
+fournis par l'élève dans l'application.
+
 N'ajoute aucune connaissance extérieure.
 
 SÉLECTIONNER N'EST PAS DÉFORMER.
 
-Une chronique radio n'est pas un résumé exhaustif.
-L'élève peut sélectionner seulement certaines informations exactes.
-
-Une information exacte ne devient pas insuffisante parce que la source
-permettrait d'en dire davantage.
-
-N'exige jamais automatiquement :
-- toutes les causes ;
-- tous les nombres ;
-- toutes les dates ;
-- tous les exemples ;
-- toutes les étapes ;
-- toutes les conséquences ;
-- tous les détails.
-
-Distingue :
-1. information fausse ou déformée ;
-2. information sélectionnée mais exacte ;
-3. information réellement trop vague pour remplir son rôle.
-
-ANTI-PLAGIAT :
-Les noms propres, dates, nombres, lieux, termes scientifiques,
-organismes et données factuelles peuvent rester identiques.
-
-En revanche, signale un risque de plagiat si l'élève reprend :
-- une phrase entière ou presque entière ;
-- la même construction avec presque les mêmes mots ;
-- plusieurs expressions caractéristiques de la source dans le même ordre.
+Une chronique n'est jamais obligée de reprendre
+toutes les informations disponibles.
 
 NIVEAU 6e-5e :
-- accepte des phrases courtes ;
-- accepte un vocabulaire simple ;
-- accepte une organisation simple ;
-- accepte 2 ou 3 idées essentielles ;
-- ne demande pas davantage de détails si l'auditeur comprend déjà
-  suffisamment l'idée.
+- phrases simples acceptées ;
+- vocabulaire simple accepté ;
+- organisation simple acceptée ;
+- quelques idées correctement traitées peuvent suffire.
 
 NIVEAU 4e-3e :
 attends davantage :
 - de précision ;
-- de vocabulaire adapté ;
+- de liens ;
 - d'explications ;
-- de liens entre les idées ;
 - de progression logique.
 
-Mais même en 4e-3e, n'exige jamais l'exhaustivité.
+Mais jamais d'exhaustivité.
 
 SI UNE CORRECTION EST NÉCESSAIRE :
-- indique brièvement ce qui fonctionne déjà ;
-- choisis UNE SEULE difficulté prioritaire ;
-- explique le problème sans écrire la solution ;
+- commence par ce qui fonctionne ;
+- choisis UNE seule difficulté prioritaire ;
+- ne fournis pas la correction ;
 - pose UNE question ciblée ;
-- laisse l'élève corriger lui-même.
+- laisse l'élève reformuler lui-même.
 
-Ne donne pas directement l'information correcte si l'élève peut
-la retrouver dans sa source.
-
-Ne cherche pas la meilleure chronique possible.
-Cherche seulement à savoir si le passage atteint le seuil nécessaire
-pour une chronique de collège destinée à être entendue à la radio.
+Ne cherche pas la perfection.
+Cherche un seuil suffisant pour une chronique radio de collège.
 """
 
 
@@ -526,106 +543,126 @@ st.title("🎙️ Coach d'écriture Radio ISTJ")
 
 
 # =========================================================
-# ÉTAPE 0 - ACCUEIL
+# ACCUEIL
 # =========================================================
 
 if st.session_state.etape == "accueil":
 
     st.write(
-        "Bienvenue dans le Coach d'écriture de Radio ISTJ."
-    )
-
-    st.write(
-        "Je vais t'aider à préparer ta chronique étape par étape, "
-        "sans faire le travail à ta place."
+        "Prépare ta chronique radio étape par étape."
     )
 
     st.divider()
 
     niveau = st.radio(
         "Quel est ton niveau ?",
-        ["6e-5e", "4e-3e"]
+        ["6e-5e", "4e-3e"],
+        horizontal=True
     )
 
     nombre_voix = st.radio(
         "Combien de voix pour la chronique ?",
-        ["1 voix", "2 voix", "3 voix"]
+        ["1 voix", "2 voix", "3 voix"],
+        horizontal=True
     )
 
-    source = st.text_area(
-        "Colle ici l'article ou la source utilisée pour préparer ta chronique :",
-        height=300
+    st.divider()
+
+    st.subheader("Comment veux-tu préparer ta chronique ?")
+
+    parcours = st.radio(
+        "Choisis ton parcours :",
+        [
+            "📄 Parcours guidé — Je pars d'une source",
+            "💡 Parcours libre — Je pars d'une idée"
+        ]
     )
 
-    if st.button("Commencer"):
+    if parcours.startswith("📄"):
 
-        if not source.strip():
+        st.info(
+            "Tu as déjà un article ou un document. "
+            "Le Coach t'aide à le comprendre, construire ton plan "
+            "et rédiger ta chronique."
+        )
 
-            st.warning(
-                "Tu dois d'abord fournir un article ou une source."
-            )
+        source = st.text_area(
+            "Colle ici l'article ou la source :",
+            height=300
+        )
 
-        else:
+        if st.button("Commencer le parcours guidé"):
 
+            if not source.strip():
+
+                st.warning(
+                    "Tu dois d'abord fournir une source."
+                )
+
+            else:
+
+                st.session_state.parcours = "guide"
+                st.session_state.niveau = niveau
+                st.session_state.nombre_voix = nombre_voix
+                st.session_state.source = source
+                st.session_state.etape = "comprehension"
+
+                st.rerun()
+
+    else:
+
+        st.info(
+            "Tu pars d'une idée ou d'un thème. "
+            "Le Coach t'aide à préciser ton sujet, choisir ton angle, "
+            "organiser tes recherches et écrire pour la radio."
+        )
+
+        if st.button("Commencer le parcours libre"):
+
+            st.session_state.parcours = "libre"
             st.session_state.niveau = niveau
             st.session_state.nombre_voix = nombre_voix
-            st.session_state.source = source
-
-            st.session_state.etape = "comprehension"
+            st.session_state.etape = "libre_cadrage"
 
             st.rerun()
 
 
 # =========================================================
-# ÉTAPE 1 - COMPRÉHENSION
+# PARCOURS GUIDÉ — COMPRÉHENSION
 # =========================================================
 
 elif st.session_state.etape == "comprehension":
 
-    st.subheader("Étape 1 - Comprendre la source")
+    st.subheader("Étape 1 — Comprendre la source")
 
     st.write(
         f"**Niveau :** {st.session_state.niveau}  \n"
         f"**Format :** {st.session_state.nombre_voix}"
     )
 
-    st.divider()
-
     sujet = st.text_area(
-        "Quel est le sujet principal de l'article ?",
+        "Quel est le sujet principal ?",
         value=st.session_state.sujet
     )
 
     idees = st.text_area(
-        "Quelles sont les 2 ou 3 idées importantes à retenir ?",
+        "Quelles sont les 2 ou 3 idées importantes ?",
         value=st.session_state.idees,
         height=160
     )
 
     vocabulaire = st.text_area(
         "Y a-t-il un mot ou un passage que tu ne comprends pas ? "
-        "Si tout est clair, écris simplement : Aucun.",
+        "Si tout est clair, écris : Aucun.",
         value=st.session_state.vocabulaire
     )
 
     if st.button("Continuer"):
 
-        if not sujet.strip():
+        if not sujet.strip() or not idees.strip() or not vocabulaire.strip():
 
             st.warning(
-                "Indique d'abord le sujet principal."
-            )
-
-        elif not idees.strip():
-
-            st.warning(
-                "Indique les idées importantes que tu as retenues."
-            )
-
-        elif not vocabulaire.strip():
-
-            st.warning(
-                "Indique les difficultés rencontrées ou écris « Aucun »."
+                "Complète les trois parties avant de continuer."
             )
 
         else:
@@ -641,10 +678,6 @@ elif st.session_state.etape == "comprehension":
             st.rerun()
 
 
-# =========================================================
-# ÉTAPE 1B - CONTRÔLE COMPRÉHENSION
-# =========================================================
-
 elif st.session_state.etape == "analyse_comprehension":
 
     st.subheader("Compréhension enregistrée")
@@ -658,10 +691,7 @@ elif st.session_state.etape == "analyse_comprehension":
     st.write("### Mots ou passages difficiles")
     st.write(st.session_state.vocabulaire)
 
-    st.divider()
-
     if st.button("Modifier mes réponses"):
-
         st.session_state.etape = "comprehension"
         st.rerun()
 
@@ -672,30 +702,29 @@ elif st.session_state.etape == "analyse_comprehension":
         if st.button("🤖 Vérifier ma compréhension"):
 
             instructions = """
-Tu vérifies uniquement l'étape de compréhension d'une source
+Tu vérifies uniquement la compréhension d'une source
 par un élève de collège.
 
-Tu dois vérifier :
+Vérifie :
 - le sujet principal ;
-- chacune des 2 ou 3 idées importantes ;
-- les éventuelles difficultés de vocabulaire.
+- les 2 ou 3 idées retenues ;
+- les éventuels mots ou passages incompris.
 
 SÉLECTIONNER N'EST PAS DÉFORMER.
 
-Une idée exacte ne doit pas être critiquée simplement parce que
-la source permettrait d'en dire davantage.
+Une idée exacte ne doit pas être critiquée
+simplement parce que la source permettrait d'en dire davantage.
 
-Si l'élève signale un mot incompris, explique ce mot avec un vocabulaire
-adapté au niveau, sans rédiger la chronique.
+Si l'élève signale un mot incompris,
+explique-le simplement.
 
 Si une erreur importante subsiste :
-- ne donne pas la bonne réponse ;
-- indique l'idée concernée ;
-- pose UNE question qui permet à l'élève de retrouver lui-même
-  l'information dans la source.
+- ne donne pas la correction ;
+- choisis UNE difficulté ;
+- pose UNE question permettant à l'élève
+  de retrouver lui-même l'information.
 
-Si toutes les réponses montrent une compréhension suffisante,
-réponds exactement :
+Si tout est suffisant, réponds exactement :
 
 COMPRÉHENSION VALIDÉE
 Tu as bien compris les idées essentielles de la source.
@@ -704,8 +733,6 @@ Tu peux passer à la construction du plan.
 Sinon commence exactement par :
 
 À REVOIR
-
-Puis donne une seule aide prioritaire.
 """
 
             contenu = f"""
@@ -715,13 +742,13 @@ NIVEAU :
 SOURCE :
 {st.session_state.source}
 
-SUJET PRINCIPAL ÉCRIT PAR L'ÉLÈVE :
+SUJET :
 {st.session_state.sujet}
 
-IDÉES IMPORTANTES :
+IDÉES :
 {st.session_state.idees}
 
-VOCABULAIRE / DIFFICULTÉS :
+VOCABULAIRE :
 {st.session_state.vocabulaire}
 """
 
@@ -730,7 +757,6 @@ VOCABULAIRE / DIFFICULTÉS :
                 with st.spinner(
                     "Le Coach vérifie ta compréhension..."
                 ):
-
                     st.session_state.feedback_comprehension = appel_ia(
                         instructions,
                         contenu
@@ -739,7 +765,6 @@ VOCABULAIRE / DIFFICULTÉS :
                 st.rerun()
 
             except Exception as e:
-
                 st.error("Erreur pendant la vérification.")
                 st.code(str(e))
 
@@ -752,12 +777,7 @@ VOCABULAIRE / DIFFICULTÉS :
 
             st.success("✅ Compréhension validée")
 
-            st.write(
-                "Tu as bien compris les idées essentielles de la source."
-            )
-
             if st.button("Construire mon plan"):
-
                 st.session_state.etape = "plan"
                 st.rerun()
 
@@ -766,69 +786,496 @@ VOCABULAIRE / DIFFICULTÉS :
             st.subheader("Retour du Coach")
             st.write(st.session_state.feedback_comprehension)
 
-            st.warning(
-                "Corrige tes réponses avant de poursuivre."
-            )
-
             if st.button("Reprendre mes réponses"):
-
                 st.session_state.etape = "comprehension"
                 st.rerun()
 
 
 # =========================================================
-# ÉTAPE 2 - PLAN
+# PARCOURS LIBRE — THÈME / SUJET / ANGLE
+# =========================================================
+
+elif st.session_state.etape == "libre_cadrage":
+
+    st.subheader("Étape 1 — De l'idée à l'angle")
+
+    st.write(
+        "Pars du général pour aller vers quelque chose de précis."
+    )
+
+    with st.expander("📻 Rappel : thème, sujet et angle"):
+
+        st.write(
+            "**Thème** : le domaine général. "
+            "Exemples : sport, musique, environnement, sciences."
+        )
+
+        st.write(
+            "**Sujet** : un aspect précis de ce thème."
+        )
+
+        st.write(
+            "**Angle** : le point de vue choisi, "
+            "c'est-à-dire ce que tu veux vraiment faire comprendre "
+            "ou découvrir à ton auditeur."
+        )
+
+        st.warning(
+            "Une chronique ne peut pas tout raconter. "
+            "Choisir un angle, c'est choisir l'essentiel."
+        )
+
+    libre_theme = st.text_input(
+        "Quel est ton thème général ?",
+        value=st.session_state.libre_theme
+    )
+
+    libre_sujet = st.text_input(
+        "Quel sujet précis veux-tu traiter ?",
+        value=st.session_state.libre_sujet
+    )
+
+    libre_angle = st.text_area(
+        "Quel angle veux-tu choisir ? "
+        "Qu'est-ce que tu veux surtout faire comprendre ou découvrir ?",
+        value=st.session_state.libre_angle,
+        height=120
+    )
+
+    if st.button("Enregistrer mon idée"):
+
+        if not all([
+            libre_theme.strip(),
+            libre_sujet.strip(),
+            libre_angle.strip()
+        ]):
+
+            st.warning(
+                "Complète le thème, le sujet et l'angle."
+            )
+
+        else:
+
+            st.session_state.libre_theme = libre_theme
+            st.session_state.libre_sujet = libre_sujet
+            st.session_state.libre_angle = libre_angle
+            st.session_state.feedback_angle = ""
+
+            st.session_state.etape = "libre_angle_verif"
+
+            st.rerun()
+
+
+elif st.session_state.etape == "libre_angle_verif":
+
+    st.subheader("Ton projet de chronique")
+
+    st.write(f"**Thème :** {st.session_state.libre_theme}")
+    st.write(f"**Sujet :** {st.session_state.libre_sujet}")
+    st.write(f"**Angle :** {st.session_state.libre_angle}")
+
+    if st.button("Modifier mon projet"):
+        st.session_state.etape = "libre_cadrage"
+        st.rerun()
+
+    st.divider()
+
+    if not st.session_state.feedback_angle:
+
+        if st.button("🤖 Vérifier mon angle"):
+
+            instructions = """
+Tu es le Coach d'écriture Radio ISTJ.
+
+Tu vérifies uniquement la relation :
+
+THÈME → SUJET → ANGLE.
+
+Le thème est général.
+Le sujet est un aspect du thème.
+L'angle est l'aspect particulier ou le message principal
+que l'élève veut faire comprendre.
+
+Un angle ne doit pas simplement répéter le sujet.
+
+Mais ne cherche pas forcément un angle original ou spectaculaire.
+
+Un angle simple et clair convient à un collégien.
+
+Tu ne proposes PAS toi-même un angle prêt à utiliser.
+
+Si l'angle est trop large :
+pose UNE question qui aide l'élève à le préciser.
+
+Si thème, sujet et angle forment un ensemble suffisamment précis,
+réponds exactement :
+
+ANGLE VALIDÉ
+Ton sujet et ton angle sont suffisamment précis.
+Tu peux commencer tes recherches.
+
+Sinon commence exactement par :
+
+À REVOIR
+"""
+
+            contenu = f"""
+NIVEAU :
+{st.session_state.niveau}
+
+THÈME :
+{st.session_state.libre_theme}
+
+SUJET :
+{st.session_state.libre_sujet}
+
+ANGLE :
+{st.session_state.libre_angle}
+"""
+
+            try:
+
+                with st.spinner(
+                    "Le Coach examine ton angle..."
+                ):
+
+                    st.session_state.feedback_angle = appel_ia(
+                        instructions,
+                        contenu
+                    )
+
+                st.rerun()
+
+            except Exception as e:
+                st.error("Erreur pendant la vérification.")
+                st.code(str(e))
+
+    else:
+
+        if est_valide(
+            st.session_state.feedback_angle,
+            "ANGLE VALIDÉ"
+        ):
+
+            st.success("✅ Angle validé")
+
+            if st.button("Passer aux recherches"):
+                st.session_state.etape = "libre_recherches"
+                st.rerun()
+
+        else:
+
+            st.subheader("Retour du Coach")
+            st.write(st.session_state.feedback_angle)
+
+            if st.button("Revoir mon angle"):
+                st.session_state.etape = "libre_cadrage"
+                st.rerun()
+
+
+# =========================================================
+# PARCOURS LIBRE — RECHERCHES
+# =========================================================
+
+elif st.session_state.etape == "libre_recherches":
+
+    st.subheader("Étape 2 — Faire mes recherches")
+
+    st.write(
+        "Rassemble maintenant les informations qui pourront servir "
+        "à ta chronique."
+    )
+
+    st.info(
+        "Tu peux utiliser plusieurs sources. "
+        "Copie ici tes notes, extraits utiles et références."
+    )
+
+    libre_recherches = st.text_area(
+        "Mes recherches et mes sources :",
+        value=st.session_state.libre_recherches,
+        height=320
+    )
+
+    libre_infos = st.text_area(
+        "Quelles informations veux-tu surtout retenir pour ta chronique ?",
+        value=st.session_state.libre_infos,
+        height=180
+    )
+
+    if st.button("Enregistrer mes recherches"):
+
+        if not libre_recherches.strip():
+
+            st.warning(
+                "Ajoute au moins une source ou des notes de recherche."
+            )
+
+        elif not libre_infos.strip():
+
+            st.warning(
+                "Indique les informations que tu souhaites retenir."
+            )
+
+        else:
+
+            st.session_state.libre_recherches = libre_recherches
+            st.session_state.libre_infos = libre_infos
+            st.session_state.feedback_recherches = ""
+
+            st.session_state.etape = "libre_recherches_verif"
+
+            st.rerun()
+
+
+elif st.session_state.etape == "libre_recherches_verif":
+
+    st.subheader("Informations retenues")
+
+    st.write(st.session_state.libre_infos)
+
+    if st.button("Modifier mes recherches"):
+        st.session_state.etape = "libre_recherches"
+        st.rerun()
+
+    st.divider()
+
+    if not st.session_state.feedback_recherches:
+
+        if st.button("🤖 Vérifier mes recherches"):
+
+            instructions = """
+Tu vérifies le travail de recherche préparatoire
+d'un élève pour une chronique radio.
+
+Utilise UNIQUEMENT les documents et notes fournis.
+
+Vérifie principalement :
+
+1. que les informations que l'élève veut retenir
+   sont justifiables par ses recherches ;
+
+2. qu'elles correspondent à son angle ;
+
+3. qu'il dispose d'assez de matière pour commencer à organiser
+   sa chronique.
+
+SÉLECTIONNER N'EST PAS DÉFORMER.
+
+L'élève n'a pas à utiliser toutes les informations trouvées.
+
+Ne rédige jamais la chronique à sa place.
+
+Si une information retenue n'est pas soutenue par les recherches :
+pose UNE question ciblée.
+
+Si le dossier est suffisant, réponds exactement :
+
+RECHERCHES VALIDÉES
+Tes recherches donnent suffisamment d'informations pour préparer ta chronique.
+
+Sinon commence exactement par :
+
+À REVOIR
+"""
+
+            contenu = f"""
+NIVEAU :
+{st.session_state.niveau}
+
+THÈME :
+{st.session_state.libre_theme}
+
+SUJET :
+{st.session_state.libre_sujet}
+
+ANGLE :
+{st.session_state.libre_angle}
+
+RECHERCHES :
+{st.session_state.libre_recherches}
+
+INFORMATIONS RETENUES :
+{st.session_state.libre_infos}
+"""
+
+            try:
+
+                with st.spinner(
+                    "Le Coach vérifie tes recherches..."
+                ):
+
+                    st.session_state.feedback_recherches = appel_ia(
+                        instructions,
+                        contenu
+                    )
+
+                st.rerun()
+
+            except Exception as e:
+                st.error("Erreur pendant la vérification.")
+                st.code(str(e))
+
+    else:
+
+        if est_valide(
+            st.session_state.feedback_recherches,
+            "RECHERCHES VALIDÉES"
+        ):
+
+            st.success("✅ Recherches validées")
+
+            if st.button("Préparer les informations essentielles"):
+                st.session_state.etape = "libre_5w"
+                st.rerun()
+
+        else:
+
+            st.subheader("Retour du Coach")
+            st.write(st.session_state.feedback_recherches)
+
+            if st.button("Reprendre mes recherches"):
+                st.session_state.etape = "libre_recherches"
+                st.rerun()
+
+
+# =========================================================
+# PARCOURS LIBRE — 5W
+# =========================================================
+
+elif st.session_state.etape == "libre_5w":
+
+    st.subheader("Étape 3 — Les informations essentielles")
+
+    st.write(
+        "Les journalistes utilisent souvent les 5 W pour vérifier "
+        "qu'ils disposent des informations utiles."
+    )
+
+    st.warning(
+        "Ce n'est pas un questionnaire obligatoire : "
+        "si une question n'est pas utile à ton angle, tu peux écrire "
+        "« Pas nécessaire pour mon angle »."
+    )
+
+    libre_what = st.text_area(
+        "WHAT ? De quoi parle précisément ta chronique ?",
+        value=st.session_state.libre_what
+    )
+
+    libre_who = st.text_area(
+        "WHO ? Qui est concerné ?",
+        value=st.session_state.libre_who
+    )
+
+    libre_where = st.text_area(
+        "WHERE ? Où cela se passe-t-il ?",
+        value=st.session_state.libre_where
+    )
+
+    libre_when = st.text_area(
+        "WHEN ? Quand cela se passe-t-il ?",
+        value=st.session_state.libre_when
+    )
+
+    libre_whyhow = st.text_area(
+        "WHY / HOW ? Pourquoi ce sujet est-il intéressant ? "
+        "Que veux-tu expliquer ou faire comprendre ?",
+        value=st.session_state.libre_whyhow,
+        height=130
+    )
+
+    if st.button("Enregistrer cette préparation"):
+
+        st.session_state.libre_what = libre_what
+        st.session_state.libre_who = libre_who
+        st.session_state.libre_where = libre_where
+        st.session_state.libre_when = libre_when
+        st.session_state.libre_whyhow = libre_whyhow
+
+        st.session_state.etape = "plan"
+
+        st.rerun()
+
+
+# =========================================================
+# PLAN — COMMUN AUX DEUX PARCOURS
 # =========================================================
 
 elif st.session_state.etape == "plan":
 
-    st.subheader("Étape 2 - Construire le plan")
+    st.subheader("Construire le plan")
 
-    st.write(
-        "Indique ce que tu veux faire dans chaque partie. "
-        "Tu n'écris pas encore les phrases de ta chronique."
-    )
+    if st.session_state.parcours == "libre":
 
-    st.divider()
+        st.info(
+            f"**Sujet :** {st.session_state.libre_sujet}\n\n"
+            f"**Angle :** {st.session_state.libre_angle}"
+        )
+
+        with st.expander("📻 Rappel : écrire pour la radio"):
+
+            st.write(
+                "**Court, clair, concis.** "
+                "Privilégie les phrases courtes et les idées faciles "
+                "à comprendre à la première écoute."
+            )
+
+            st.write(
+                "Ton introduction peut comporter une **accroche** "
+                "qui donne envie de rester à l'écoute."
+            )
+
+            st.write(
+                "Ton développement doit rester centré sur ton **angle**."
+            )
+
+            st.write(
+                "Ta conclusion doit apporter une vraie idée de fin."
+            )
+
+    else:
+
+        st.write(
+            "Indique ce que tu veux faire dans chaque partie. "
+            "Tu n'écris pas encore les phrases."
+        )
 
     plan_introduction = st.text_area(
-        "Introduction - Que veux-tu présenter au début ?",
+        "Introduction — Que veux-tu faire au début ?",
         value=st.session_state.plan_introduction
     )
 
     plan_developpement = st.text_area(
-        "Développement - Quelles idées veux-tu expliquer, et dans quel ordre ?",
+        "Développement — Quelles idées veux-tu présenter, et dans quel ordre ?",
         value=st.session_state.plan_developpement,
-        height=170
+        height=180
     )
 
     plan_conclusion = st.text_area(
-        "Conclusion - Sur quelle idée veux-tu terminer ?",
+        "Conclusion — Sur quelle idée veux-tu terminer ?",
         value=st.session_state.plan_conclusion
     )
 
     if st.session_state.nombre_voix != "1 voix":
 
         plan_repartition = st.text_area(
-            f"Répartition des {st.session_state.nombre_voix} - "
+            f"Répartition des {st.session_state.nombre_voix} — "
             "Qui intervient dans les différentes parties ?",
             value=st.session_state.plan_repartition,
             height=140
         )
 
     else:
-
         plan_repartition = ""
 
     if st.button("Enregistrer mon plan"):
 
-        manque = (
-            not plan_introduction.strip()
-            or not plan_developpement.strip()
-            or not plan_conclusion.strip()
-        )
-
-        if manque:
+        if not all([
+            plan_introduction.strip(),
+            plan_developpement.strip(),
+            plan_conclusion.strip()
+        ]):
 
             st.warning(
                 "Complète l'introduction, le développement et la conclusion."
@@ -857,10 +1304,6 @@ elif st.session_state.etape == "plan":
             st.rerun()
 
 
-# =========================================================
-# ÉTAPE 2B - CONTRÔLE PLAN
-# =========================================================
-
 elif st.session_state.etape == "plan_enregistre":
 
     st.subheader("Plan enregistré")
@@ -878,10 +1321,7 @@ elif st.session_state.etape == "plan_enregistre":
         st.write("### Répartition des voix")
         st.write(st.session_state.plan_repartition)
 
-    st.divider()
-
     if st.button("Modifier mon plan"):
-
         st.session_state.etape = "plan"
         st.rerun()
 
@@ -889,34 +1329,37 @@ elif st.session_state.etape == "plan_enregistre":
 
     if not st.session_state.feedback_plan:
 
-        if st.button("🤖 Faire vérifier mon plan par le Coach"):
+        if st.button("🤖 Faire vérifier mon plan"):
 
             instructions = """
-Tu vérifies uniquement le plan d'une chronique radio.
+Tu vérifies le plan d'une chronique Radio ISTJ.
 
-Le plan peut être très simple et rédigé sous forme de notes.
+Le plan peut être simple.
 
-Il doit permettre de préparer :
-- une introduction ;
-- un développement ;
-- une conclusion.
+Vérifie :
+- introduction ;
+- développement ;
+- conclusion ;
+- cohérence avec le sujet ;
+- cohérence avec l'angle s'il existe ;
+- répartition des voix si nécessaire.
 
-Pour plusieurs voix, vérifie également que la répartition
-des interventions est exploitable.
+Le plan n'est PAS le texte définitif.
 
-N'exige pas une alternance parfaite entre les voix.
+Tu ne rédiges aucune phrase à la place de l'élève.
 
 SÉLECTIONNER N'EST PAS DÉFORMER.
 
-Pour 6e-5e, un plan simple avec 2 ou 3 idées essentielles
-suffisamment identifiées peut être accepté.
+Pour 6e-5e :
+un plan simple peut suffire.
 
-N'exige pas tous les nombres, toutes les causes ou tous les détails.
+Pour 4e-3e :
+attends davantage de précision et de progression,
+sans exiger l'exhaustivité.
 
-Pour 4e-3e, attends davantage de précision et d'organisation,
-mais jamais l'exhaustivité.
-
-Tu ne rédiges aucune phrase de chronique.
+Si l'élève suit un parcours libre,
+vérifie particulièrement que le développement reste centré
+sur l'ANGLE choisi.
 
 Si le plan est suffisant, réponds exactement :
 
@@ -928,8 +1371,7 @@ Sinon commence exactement par :
 
 À REVOIR
 
-Puis signale UNE seule difficulté prioritaire
-et pose UNE question ciblée sans réécrire le plan.
+Puis traite UNE difficulté prioritaire.
 """
 
             contenu = f"""
@@ -939,31 +1381,30 @@ NIVEAU :
 FORMAT :
 {st.session_state.nombre_voix}
 
-SOURCE :
-{st.session_state.source}
+PARCOURS :
+{st.session_state.parcours}
 
-SUJET COMPRIS :
-{st.session_state.sujet}
+DOCUMENTS / RECHERCHES :
+{contexte_documentaire()}
 
-IDÉES IMPORTANTES :
-{st.session_state.idees}
-
-INTRODUCTION PRÉVUE :
+PLAN INTRODUCTION :
 {st.session_state.plan_introduction}
 
-DÉVELOPPEMENT PRÉVU :
+PLAN DÉVELOPPEMENT :
 {st.session_state.plan_developpement}
 
-CONCLUSION PRÉVUE :
+PLAN CONCLUSION :
 {st.session_state.plan_conclusion}
 
-RÉPARTITION DES VOIX :
+RÉPARTITION :
 {st.session_state.plan_repartition}
 """
 
             try:
 
-                with st.spinner("Le Coach vérifie ton plan..."):
+                with st.spinner(
+                    "Le Coach vérifie ton plan..."
+                ):
 
                     st.session_state.feedback_plan = appel_ia(
                         instructions,
@@ -973,8 +1414,7 @@ RÉPARTITION DES VOIX :
                 st.rerun()
 
             except Exception as e:
-
-                st.error("Erreur pendant la vérification du plan.")
+                st.error("Erreur pendant la vérification.")
                 st.code(str(e))
 
     else:
@@ -986,12 +1426,7 @@ RÉPARTITION DES VOIX :
 
             st.success("✅ Plan validé")
 
-            st.write(
-                "Ton plan est suffisamment clair et organisé."
-            )
-
             if st.button("Rédiger mon introduction"):
-
                 st.session_state.etape = "introduction"
                 st.rerun()
 
@@ -1001,33 +1436,30 @@ RÉPARTITION DES VOIX :
             st.write(st.session_state.feedback_plan)
 
             if st.button("Reprendre mon plan"):
-
                 st.session_state.etape = "plan"
                 st.rerun()
 
 
 # =========================================================
-# ÉTAPE 3 - INTRODUCTION
+# INTRODUCTION — COMMUNE
 # =========================================================
 
 elif st.session_state.etape == "introduction":
 
-    st.subheader("Étape 3 - Rédiger l'introduction")
+    st.subheader("Rédiger l'introduction")
 
-    st.write(
-        "Écris maintenant toi-même ton introduction."
-    )
+    if st.session_state.parcours == "libre":
 
-    st.info(
-        "Elle doit permettre à l'auditeur d'identifier le sujet "
-        "et de comprendre pourquoi il mérite une chronique."
-    )
+        st.info(
+            "Pense à l'écoute : ton début doit permettre de comprendre "
+            "le sujet et, si possible, donner envie d'écouter la suite."
+        )
 
-    if st.session_state.nombre_voix != "1 voix":
+    else:
 
-        st.write(
-            f"Pour une chronique à {st.session_state.nombre_voix}, "
-            "indique clairement les voix, par exemple « Voix 1 : »."
+        st.info(
+            "L'introduction doit permettre d'identifier le sujet "
+            "et de comprendre son intérêt."
         )
 
     st.write("### Ton plan")
@@ -1036,38 +1468,27 @@ elif st.session_state.etape == "introduction":
     introduction = st.text_area(
         "Ton introduction :",
         value=st.session_state.introduction,
-        height=170
+        height=180
     )
 
     if st.button("Enregistrer mon introduction"):
 
         if not introduction.strip():
-
             st.warning("Écris d'abord ton introduction.")
 
         else:
-
             st.session_state.introduction = introduction
-
             invalider_apres("introduction")
-
             st.session_state.etape = "controle_introduction"
-
             st.rerun()
 
-
-# =========================================================
-# ÉTAPE 3B - CONTRÔLE INTRODUCTION
-# =========================================================
 
 elif st.session_state.etape == "controle_introduction":
 
     st.subheader("Ton introduction")
-
     st.write(st.session_state.introduction)
 
     if st.button("Modifier mon introduction"):
-
         st.session_state.etape = "introduction"
         st.rerun()
 
@@ -1081,85 +1502,33 @@ elif st.session_state.etape == "controle_introduction":
 
 TU CONTRÔLES UNIQUEMENT L'INTRODUCTION.
 
-RÔLE DE L'INTRODUCTION :
+Elle doit :
+- permettre d'identifier le sujet ;
+- permettre de comprendre son intérêt.
 
-L'introduction doit seulement permettre :
-1. d'identifier suffisamment le sujet de la chronique ;
-2. de comprendre pourquoi ce sujet peut présenter un intérêt
-   pour l'auditeur.
+Dans le parcours libre,
+vérifie aussi qu'elle reste cohérente avec l'angle.
 
-Elle n'a PAS pour rôle d'expliquer déjà le développement.
+Une accroche intéressante est un PLUS,
+mais ne refuse pas automatiquement une introduction simple
+si elle remplit déjà son rôle.
 
-RÈGLE TRÈS IMPORTANTE POUR 6e-5e :
+Pour 6e-5e :
+une ou deux phrases simples peuvent suffire.
 
-Une ou deux phrases simples peuvent suffire.
-
-Si le sujet est identifiable et qu'au moins un élément permet
-de comprendre son intérêt, l'introduction DOIT être validée.
-
-NE BLOQUE JAMAIS une introduction correcte de niveau 6e-5e
-simplement parce qu'elle n'explique pas encore :
-- comment fonctionne une technique ;
-- son mécanisme ;
-- une cause ;
-- une conséquence ;
-- les résultats ;
-- une date ;
-- un nombre ;
-- une statistique ;
-- un lieu plus précis ;
-- un exemple ;
-- un détail scientifique ou technique.
-
-Ces informations peuvent naturellement être expliquées
-dans le développement.
-
-CAS IMPORTANT :
-
-Une introduction de niveau 6e-5e qui annonce clairement
-« une nouvelle technique testée pour lutter contre le cancer
-du pancréas » identifie suffisamment le sujet et son intérêt.
-
-Elle ne doit PAS être refusée au motif qu'elle n'explique pas encore
-comment cette technique agit sur la tumeur.
-
-Ne transforme jamais une possibilité d'enrichissement
-en condition obligatoire de validation.
-
-UNE INTRODUCTION DOIT ÊTRE REFUSÉE seulement si, par exemple :
-- le sujet n'est pas identifiable ;
-- elle contient une erreur importante ;
-- elle déforme la source ;
-- elle est tellement générale qu'elle pourrait convenir
-  à presque n'importe quel sujet ;
-- elle reprend de manière trop proche une phrase de la source ;
-- elle est réellement incompréhensible à la première écoute.
+Ne demande pas automatiquement :
+- date ;
+- chiffre ;
+- lieu plus précis ;
+- mécanisme ;
+- détail technique ;
+- explication qui pourra venir dans le développement.
 
 Pour 4e-3e :
-tu peux attendre davantage de précision et de contextualisation,
-mais sans demander que l'introduction contienne déjà
-les explications du développement.
+tu peux attendre davantage de contextualisation,
+mais l'introduction n'a pas à contenir le développement.
 
-Vérifie aussi :
-- fidélité à la source ;
-- formulation personnelle ;
-- compréhension à la première écoute ;
-- respect du plan.
-
-Pour plusieurs voix :
-les répliques doivent être clairement identifiables.
-
-AVANT DE REFUSER L'INTRODUCTION, pose-toi obligatoirement
-cette question :
-
-« L'information que je souhaite demander est-elle indispensable
-pour identifier le sujet et comprendre son intérêt,
-ou pourrait-elle normalement être expliquée dans le développement ? »
-
-Si elle peut normalement être expliquée dans le développement,
-NE LA DEMANDE PAS et valide l'introduction si le reste est correct.
-
-Si l'introduction est suffisante, réponds exactement :
+Si elle est suffisante, réponds exactement :
 
 INTRODUCTION VALIDÉE
 L'introduction remplit son rôle.
@@ -1168,24 +1537,25 @@ Tu peux passer au développement.
 Sinon commence exactement par :
 
 À REVOIR
-
-Puis applique les règles d'aide définies plus haut.
 """
 
             contenu = f"""
 NIVEAU :
 {st.session_state.niveau}
 
+PARCOURS :
+{st.session_state.parcours}
+
 FORMAT :
 {st.session_state.nombre_voix}
 
-SOURCE :
-{st.session_state.source}
+DOCUMENTS / RECHERCHES :
+{contexte_documentaire()}
 
-PLAN DE L'INTRODUCTION :
+PLAN :
 {st.session_state.plan_introduction}
 
-INTRODUCTION ÉCRITE PAR L'ÉLÈVE :
+INTRODUCTION :
 {st.session_state.introduction}
 """
 
@@ -1203,7 +1573,6 @@ INTRODUCTION ÉCRITE PAR L'ÉLÈVE :
                 st.rerun()
 
             except Exception as e:
-
                 st.error("Erreur pendant la vérification.")
                 st.code(str(e))
 
@@ -1217,7 +1586,6 @@ INTRODUCTION ÉCRITE PAR L'ÉLÈVE :
             st.success("✅ Introduction validée")
 
             if st.button("Passer au développement"):
-
                 st.session_state.etape = "developpement"
                 st.rerun()
 
@@ -1227,22 +1595,24 @@ INTRODUCTION ÉCRITE PAR L'ÉLÈVE :
             st.write(st.session_state.feedback_introduction)
 
             if st.button("Corriger mon introduction"):
-
                 st.session_state.etape = "introduction"
                 st.rerun()
 
 
 # =========================================================
-# ÉTAPE 4 - DÉVELOPPEMENT
+# DÉVELOPPEMENT — COMMUN
 # =========================================================
 
 elif st.session_state.etape == "developpement":
 
-    st.subheader("Étape 4 - Rédiger le développement")
+    st.subheader("Rédiger le développement")
 
-    st.write(
-        "Écris maintenant le développement avec tes propres phrases."
-    )
+    if st.session_state.parcours == "libre":
+
+        st.info(
+            f"Reste centré sur ton angle : "
+            f"**{st.session_state.libre_angle}**"
+        )
 
     st.write("### Ton plan")
     st.write(st.session_state.plan_developpement)
@@ -1252,45 +1622,30 @@ elif st.session_state.etape == "developpement":
         st.write("### Répartition prévue")
         st.write(st.session_state.plan_repartition)
 
-        st.info(
-            "Indique clairement la voix qui prononce chaque réplique."
-        )
-
     developpement = st.text_area(
         "Ton développement :",
         value=st.session_state.developpement,
-        height=320
+        height=340
     )
 
     if st.button("Enregistrer mon développement"):
 
         if not developpement.strip():
-
             st.warning("Écris d'abord ton développement.")
 
         else:
-
             st.session_state.developpement = developpement
-
             invalider_apres("developpement")
-
             st.session_state.etape = "controle_developpement"
-
             st.rerun()
 
-
-# =========================================================
-# ÉTAPE 4B - CONTRÔLE DÉVELOPPEMENT
-# =========================================================
 
 elif st.session_state.etape == "controle_developpement":
 
     st.subheader("Ton développement")
-
     st.write(st.session_state.developpement)
 
     if st.button("Modifier mon développement"):
-
         st.session_state.etape = "developpement"
         st.rerun()
 
@@ -1304,314 +1659,82 @@ elif st.session_state.etape == "controle_developpement":
 
 TU CONTRÔLES UNIQUEMENT LE DÉVELOPPEMENT.
 
-=========================================================
-1. RÔLE DU DÉVELOPPEMENT
-=========================================================
+Le PLAN est le contrat principal de rédaction.
 
-Compare le développement :
-- à la source ;
-- au plan choisi par l'élève.
+Le développement n'a pas à reprendre
+toutes les informations disponibles.
 
-Vérifie que les idées prévues dans le plan ont réellement été traitées.
+Vérifie :
+- fidélité aux recherches ;
+- idées prévues dans le plan ;
+- clarté à l'écoute ;
+- formulation personnelle ;
+- cohérence avec l'angle dans le parcours libre.
 
-Le point de comparaison principal est le PLAN de l'élève,
-PAS l'ensemble des informations disponibles dans la source.
+Pour le parcours libre :
+l'élève peut avoir davantage de liberté de ton,
+de structure, de description et de transitions.
 
-Le développement n'a pas à reprendre tout l'article.
+Ne transforme pas cette liberté en obligation.
 
-SÉLECTIONNER N'EST PAS DÉFORMER.
+IMPORTANT :
 
-Une information exacte ne devient pas insuffisante simplement parce
-que la source permettrait de donner davantage de détails.
+Le mot « comment » dans un plan
+ne signifie pas automatiquement
+« décrire toute la procédure technique ».
 
+Une explication du principe peut suffire.
 
-=========================================================
-2. FIDÉLITÉ
-=========================================================
+Pour 6e-5e :
+quelques informations simples et exactes peuvent suffire.
 
-Une correction est nécessaire si une information :
-- est fausse ;
-- inverse le sens de la source ;
-- déforme réellement une idée ;
-- présente comme certain quelque chose qui ne l'est pas ;
-- ajoute un fait absent ;
-- crée une relation de cause à effet absente.
+Pour 4e-3e :
+attends davantage de précision et d'explication.
 
-NE CORRIGE PAS simplement parce que :
-- l'information pourrait être plus détaillée ;
-- un terme plus précis existe ;
-- un nombre est absent ;
-- plusieurs exemples existent ;
-- une procédure plus complète est disponible.
+RÈGLE D'ARRÊT :
 
-
-=========================================================
-3. NIVEAU 6e-5e
-=========================================================
-
-Accepte :
-- phrases courtes ;
-- vocabulaire simple ;
-- organisation simple ;
-- quelques informations essentielles ;
-- 2 ou 3 idées correctement expliquées.
-
-N'exige pas systématiquement :
-- plusieurs causes ;
-- nombres ;
-- dates ;
-- durées ;
-- tous les exemples ;
-- toutes les étapes ;
-- détails scientifiques ou techniques.
-
-
-=========================================================
-4. NIVEAU 4e-3e
-=========================================================
-
-Attends davantage :
-- de précision ;
-- d'explication ;
-- de vocabulaire adapté ;
-- de liens entre les idées ;
-- de progression logique.
-
-Une idée prévue dans le plan peut nécessiter une explication
-si l'élève affirme seulement un résultat sans permettre
-de comprendre suffisamment le phénomène.
-
-Mais même en 4e-3e :
-
-N'EXIGE JAMAIS L'EXHAUSTIVITÉ.
-
-
-=========================================================
-5. INTERPRÉTATION DU PLAN
-=========================================================
-
-Le plan est un guide de rédaction.
-
-Mais tu ne dois PAS interpréter chaque verbe du plan
-comme une obligation de fournir tous les détails techniques possibles.
-
-LE MOT « COMMENT » NE SIGNIFIE PAS AUTOMATIQUEMENT
-« DÉCRIRE TOUTE LA PROCÉDURE TECHNIQUE ».
-
-Lorsque le plan prévoit :
-- expliquer comment une technique agit ;
-- expliquer comment un traitement est utilisé ;
-- expliquer comment un produit est placé ;
-- expliquer comment une action est réalisée ;
-
-cherche d'abord le PRINCIPE nécessaire à la compréhension.
-
-Une explication conceptuelle simple peut suffire.
-
-N'exige PAS automatiquement :
-- les instruments ;
-- les appareils ;
-- le matériel ;
-- tous les gestes ;
-- toutes les étapes opératoires ;
-- tous les détails de positionnement ;
-- tous les nombres de la procédure.
-
-Ces informations deviennent obligatoires seulement si :
-
-1. le plan les mentionne explicitement ;
-
-OU
-
-2. leur absence empêche réellement de comprendre le principe.
-
-EXEMPLE DE RÉFÉRENCE :
-
-PLAN :
-« Expliquer comment le radium 224 est placé dans la tumeur. »
-
-DÉVELOPPEMENT :
-« Des bâtonnets avec du radium 224 sont placés directement
-dans la tumeur. »
-
-Pour un élève de 4e-3e,
-cette information peut suffire à faire comprendre
-le principe de l'implantation.
-
-N'exige pas automatiquement :
-- l'endoscope ;
-- l'aiguille ;
-- le nombre exact de bâtonnets ;
-- leur positionnement précis ;
-- la procédure opératoire complète.
-
-« Expliquer comment » peut être satisfait
-par une explication du principe.
-
-
-=========================================================
-6. RÈGLE D'ARRÊT
-=========================================================
-
-Tu dois savoir ARRÊTER la correction.
-
-Dès que les idées prévues dans le plan :
-- sont présentes ;
-- sont fidèles ;
-- sont suffisamment expliquées pour le niveau ;
-
-le développement DOIT être validé.
-
-Ne demande pas ensuite :
-- instrument ;
-- chiffre ;
-- date ;
-- durée ;
-- étape technique ;
-- détail de procédure ;
-- exemple supplémentaire ;
-- précision scientifique supplémentaire
-
-simplement parce que cette information existe dans la source.
-
-
-=========================================================
-7. TEST DE DÉCISION
-=========================================================
-
-Avant chaque « À REVOIR », demande-toi :
-
-1. L'idée demandée par le plan est-elle présente ?
-2. Son principe essentiel est-il compréhensible ?
-3. L'information supplémentaire est-elle indispensable ?
-
-Si :
-
-1. OUI
-2. OUI
-3. NON
-
-alors tu DOIS valider cette idée.
-
-Ne confonds jamais :
-
-« le texte pourrait être plus détaillé »
-
-avec
-
-« le texte est insuffisant ».
-
-Si tu constates toi-même que toutes les idées du plan
-sont présentes, fidèles et suffisamment expliquées,
+Si toutes les idées prévues sont présentes,
+fidèles et suffisamment expliquées,
 tu DOIS valider.
 
+Ne demande pas ensuite un chiffre,
+un exemple, un instrument,
+une étape ou un détail simplement
+parce qu'il existe dans les recherches.
 
-=========================================================
-8. QUALITÉ RADIO
-=========================================================
-
-Le développement doit être compréhensible à la première écoute.
-
-Une formulation simple, scolaire ou imparfaite
-peut être acceptée si elle reste claire.
-
-Ne cherche pas une chronique parfaite.
-
-
-=========================================================
-9. PLUSIEURS VOIX
-=========================================================
-
-Pour 2 ou 3 voix :
-- les répliques doivent être identifiables ;
-- la répartition doit rester cohérente ;
-- l'ensemble doit être compréhensible.
-
-N'exige pas :
-- une alternance parfaite ;
-- le même nombre de phrases ;
-- la même durée de parole.
-
-
-=========================================================
-10. PLAGIAT
-=========================================================
-
-Les noms, dates, nombres, lieux et termes scientifiques nécessaires
-peuvent être identiques à ceux de la source.
-
-Signale seulement :
-- phrase entière ou presque entière copiée ;
-- même construction avec presque les mêmes mots ;
-- plusieurs expressions caractéristiques dans le même ordre.
-
-
-=========================================================
-11. VALIDATION
-=========================================================
-
-Si les idées prévues dans le plan sont :
-- présentes ;
-- fidèles ;
-- suffisamment expliquées ;
-- compréhensibles à l'oral ;
-- suffisamment reformulées ;
-
-réponds EXACTEMENT :
+Si le développement est suffisant, réponds exactement :
 
 DÉVELOPPEMENT VALIDÉ
 Le développement remplit son rôle.
 Tu peux passer à la conclusion.
 
-
-=========================================================
-12. CORRECTION
-=========================================================
-
-Si une correction est réellement nécessaire,
-commence EXACTEMENT par :
+Sinon commence exactement par :
 
 À REVOIR
 
-Puis :
-- dis brièvement ce qui fonctionne ;
-- choisis UNE seule difficulté ;
-- explique pourquoi elle bloque réellement la compréhension ;
-- ne rédige pas la correction ;
-- pose UNE seule question ciblée ;
-- laisse l'élève corriger lui-même.
-
-Après correction, applique à nouveau la règle d'arrêt.
-
-Ne cherche pas immédiatement un nouveau détail.
-
-PRINCIPE FINAL :
-
-SÉLECTIONNER N'EST PAS DÉFORMER.
-
-SUFFISAMMENT EXPLIQUÉ N'EST PAS INSUFFISAMMENT DÉTAILLÉ.
-
-EXPLIQUER UN PRINCIPE N'IMPOSE PAS DE DÉCRIRE
-TOUTE LA PROCÉDURE TECHNIQUE.
+Traite UNE difficulté prioritaire.
 """
 
             contenu = f"""
 NIVEAU :
 {st.session_state.niveau}
 
+PARCOURS :
+{st.session_state.parcours}
+
 FORMAT :
 {st.session_state.nombre_voix}
 
-SOURCE :
-{st.session_state.source}
+DOCUMENTS / RECHERCHES :
+{contexte_documentaire()}
 
-PLAN DU DÉVELOPPEMENT :
+PLAN :
 {st.session_state.plan_developpement}
 
-RÉPARTITION PRÉVUE :
+RÉPARTITION :
 {st.session_state.plan_repartition}
 
-DÉVELOPPEMENT ÉCRIT PAR L'ÉLÈVE :
+DÉVELOPPEMENT :
 {st.session_state.developpement}
 """
 
@@ -1629,7 +1752,6 @@ DÉVELOPPEMENT ÉCRIT PAR L'ÉLÈVE :
                 st.rerun()
 
             except Exception as e:
-
                 st.error("Erreur pendant la vérification.")
                 st.code(str(e))
 
@@ -1643,7 +1765,6 @@ DÉVELOPPEMENT ÉCRIT PAR L'ÉLÈVE :
             st.success("✅ Développement validé")
 
             if st.button("Passer à la conclusion"):
-
                 st.session_state.etape = "conclusion"
                 st.rerun()
 
@@ -1653,68 +1774,45 @@ DÉVELOPPEMENT ÉCRIT PAR L'ÉLÈVE :
             st.write(st.session_state.feedback_developpement)
 
             if st.button("Corriger mon développement"):
-
                 st.session_state.etape = "developpement"
                 st.rerun()
 
 
 # =========================================================
-# ÉTAPE 5 - CONCLUSION
+# CONCLUSION — COMMUNE
 # =========================================================
 
 elif st.session_state.etape == "conclusion":
 
-    st.subheader("Étape 5 - Rédiger la conclusion")
-
-    st.write(
-        "Écris maintenant toi-même la conclusion de ta chronique."
-    )
+    st.subheader("Rédiger la conclusion")
 
     st.write("### Ton plan")
     st.write(st.session_state.plan_conclusion)
 
-    if st.session_state.nombre_voix != "1 voix":
-
-        st.info(
-            "Si plusieurs voix interviennent dans la conclusion, "
-            "indique-les clairement."
-        )
-
     conclusion = st.text_area(
         "Ta conclusion :",
         value=st.session_state.conclusion,
-        height=170
+        height=180
     )
 
     if st.button("Enregistrer ma conclusion"):
 
         if not conclusion.strip():
-
             st.warning("Écris d'abord ta conclusion.")
 
         else:
-
             st.session_state.conclusion = conclusion
-
             invalider_apres("conclusion")
-
             st.session_state.etape = "controle_conclusion"
-
             st.rerun()
 
-
-# =========================================================
-# ÉTAPE 5B - CONTRÔLE CONCLUSION
-# =========================================================
 
 elif st.session_state.etape == "controle_conclusion":
 
     st.subheader("Ta conclusion")
-
     st.write(st.session_state.conclusion)
 
     if st.button("Modifier ma conclusion"):
-
         st.session_state.etape = "conclusion"
         st.rerun()
 
@@ -1728,33 +1826,25 @@ elif st.session_state.etape == "controle_conclusion":
 
 TU CONTRÔLES UNIQUEMENT LA CONCLUSION.
 
-Une conclusion doit apporter une véritable idée de fin.
+Elle doit apporter une vraie idée de fin.
 
-Elle peut notamment :
-- rappeler ce qu'il faut retenir ;
+Elle peut :
+- rappeler l'essentiel ;
+- ouvrir sur une perspective ;
 - présenter un enjeu ;
-- présenter une conséquence ;
-- évoquer une perspective ;
-- montrer un espoir ou une incertitude présente dans la source ;
-- contenir une courte appréciation personnelle clairement identifiable.
+- montrer une incertitude ;
+- donner une courte appréciation personnelle identifiable.
 
 Pour 6e-5e :
-une seule phrase simple peut suffire.
+une phrase simple peut suffire.
 
-Ne demande pas une information supplémentaire simplement
-pour rendre la conclusion plus riche.
+Dans le parcours libre :
+elle doit rester cohérente avec l'angle choisi.
 
-En revanche, ne valide pas une conclusion tellement vague,
-répétitive ou circulaire qu'elle n'apporte pas réellement de fin.
+Ne demande pas une information supplémentaire
+simplement pour enrichir le texte.
 
-Vérifie :
-- fidélité lorsqu'elle contient des faits ;
-- absence de fait inventé ;
-- formulation personnelle ;
-- clarté à l'oral ;
-- respect du plan.
-
-Si la conclusion est suffisante, réponds exactement :
+Si elle est suffisante, réponds exactement :
 
 CONCLUSION VALIDÉE
 La conclusion apporte une véritable idée de fin.
@@ -1763,21 +1853,22 @@ Tu peux passer aux références.
 Sinon commence exactement par :
 
 À REVOIR
-
-Puis applique les règles d'aide.
 """
 
             contenu = f"""
 NIVEAU :
 {st.session_state.niveau}
 
-SOURCE :
-{st.session_state.source}
+PARCOURS :
+{st.session_state.parcours}
 
-PLAN DE LA CONCLUSION :
+DOCUMENTS / RECHERCHES :
+{contexte_documentaire()}
+
+PLAN :
 {st.session_state.plan_conclusion}
 
-CONCLUSION ÉCRITE PAR L'ÉLÈVE :
+CONCLUSION :
 {st.session_state.conclusion}
 """
 
@@ -1795,7 +1886,6 @@ CONCLUSION ÉCRITE PAR L'ÉLÈVE :
                 st.rerun()
 
             except Exception as e:
-
                 st.error("Erreur pendant la vérification.")
                 st.code(str(e))
 
@@ -1809,7 +1899,6 @@ CONCLUSION ÉCRITE PAR L'ÉLÈVE :
             st.success("✅ Conclusion validée")
 
             if st.button("Indiquer mes références"):
-
                 st.session_state.etape = "references"
                 st.rerun()
 
@@ -1819,91 +1908,118 @@ CONCLUSION ÉCRITE PAR L'ÉLÈVE :
             st.write(st.session_state.feedback_conclusion)
 
             if st.button("Corriger ma conclusion"):
-
                 st.session_state.etape = "conclusion"
                 st.rerun()
 
 
 # =========================================================
-# ÉTAPE 6 - RÉFÉRENCES
+# RÉFÉRENCES
 # =========================================================
 
 elif st.session_state.etape == "references":
 
-    st.subheader("Étape 6 - Retrouver les références")
+    st.subheader("Références")
 
-    st.write(
-        "Retrouve toi-même ces informations dans ta source."
-    )
+    if st.session_state.parcours == "guide":
 
-    st.info(
-        "Si une information n'est pas indiquée dans la source, "
-        "écris « Non indiqué »."
-    )
+        st.write(
+            "Retrouve toi-même les références dans la source."
+        )
 
-    ref_auteur = st.text_input(
-        "Auteur :",
-        value=st.session_state.ref_auteur
-    )
+        st.info(
+            "Si une information n'est pas indiquée, "
+            "écris « Non indiqué »."
+        )
 
-    ref_titre = st.text_input(
-        "Titre :",
-        value=st.session_state.ref_titre
-    )
+        ref_auteur = st.text_input(
+            "Auteur :",
+            value=st.session_state.ref_auteur
+        )
 
-    ref_media = st.text_input(
-        "Média :",
-        value=st.session_state.ref_media
-    )
+        ref_titre = st.text_input(
+            "Titre :",
+            value=st.session_state.ref_titre
+        )
 
-    ref_date = st.text_input(
-        "Date :",
-        value=st.session_state.ref_date
-    )
+        ref_media = st.text_input(
+            "Média :",
+            value=st.session_state.ref_media
+        )
 
-    if st.button("Enregistrer mes références"):
+        ref_date = st.text_input(
+            "Date :",
+            value=st.session_state.ref_date
+        )
 
-        if not all([
-            ref_auteur.strip(),
-            ref_titre.strip(),
-            ref_media.strip(),
-            ref_date.strip()
-        ]):
+        if st.button("Enregistrer mes références"):
 
-            st.warning(
-                "Complète les quatre champs. "
-                "Écris « Non indiqué » lorsque l'information est absente."
-            )
+            if not all([
+                ref_auteur.strip(),
+                ref_titre.strip(),
+                ref_media.strip(),
+                ref_date.strip()
+            ]):
 
-        else:
+                st.warning(
+                    "Complète les quatre champs."
+                )
 
-            st.session_state.ref_auteur = ref_auteur
-            st.session_state.ref_titre = ref_titre
-            st.session_state.ref_media = ref_media
-            st.session_state.ref_date = ref_date
+            else:
 
-            invalider_apres("references")
+                st.session_state.ref_auteur = ref_auteur
+                st.session_state.ref_titre = ref_titre
+                st.session_state.ref_media = ref_media
+                st.session_state.ref_date = ref_date
 
-            st.session_state.etape = "controle_references"
+                invalider_apres("references")
 
-            st.rerun()
+                st.session_state.etape = "controle_references"
 
+                st.rerun()
 
-# =========================================================
-# ÉTAPE 6B - CONTRÔLE RÉFÉRENCES
-# =========================================================
+    else:
+
+        st.write(
+            "Indique les sources réellement utilisées pour ta chronique."
+        )
+
+        st.info(
+            "Tu peux avoir plusieurs sources. "
+            "Indique assez d'informations pour pouvoir les retrouver : "
+            "auteur ou organisme, titre, média/site, date, lien si tu l'as."
+        )
+
+        libre_references = st.text_area(
+            "Mes références :",
+            value=st.session_state.libre_references,
+            height=220
+        )
+
+        if st.button("Enregistrer mes références"):
+
+            if not libre_references.strip():
+
+                st.warning(
+                    "Indique au moins une référence."
+                )
+
+            else:
+
+                st.session_state.libre_references = libre_references
+
+                invalider_apres("references")
+
+                st.session_state.etape = "controle_references"
+
+                st.rerun()
+
 
 elif st.session_state.etape == "controle_references":
 
     st.subheader("Tes références")
-
-    st.write(f"**Auteur :** {st.session_state.ref_auteur}")
-    st.write(f"**Titre :** {st.session_state.ref_titre}")
-    st.write(f"**Média :** {st.session_state.ref_media}")
-    st.write(f"**Date :** {st.session_state.ref_date}")
+    st.write(references_affichees())
 
     if st.button("Modifier mes références"):
-
         st.session_state.etape = "references"
         st.rerun()
 
@@ -1914,54 +2030,41 @@ elif st.session_state.etape == "controle_references":
         if st.button("🤖 Vérifier mes références"):
 
             instructions = """
-Tu vérifies uniquement les références identifiées par un élève.
+Tu vérifies uniquement les références d'une chronique.
 
-Compare-les avec la SOURCE.
+Compare les références avec les documents et recherches
+fournis par l'élève.
 
-L'élève doit avoir lui-même fourni :
-- l'auteur, s'il est indiqué ;
-- le titre ;
-- le média ;
-- la date, si elle est disponible.
+Dans le parcours guidé :
+vérifie auteur, titre, média et date.
 
-Si une information n'existe pas dans la source,
-« Non indiqué » peut être accepté.
+Dans le parcours libre :
+plusieurs sources sont possibles.
+Vérifie surtout que les sources citées correspondent
+aux recherches utilisées et permettent raisonnablement
+de retrouver les documents.
 
-Tu ne fabriques jamais toi-même une référence
-pour remplacer le travail de l'élève.
+Tu ne fabriques pas de référence à la place de l'élève.
 
-Si les références correspondent suffisamment à la source,
-réponds exactement :
+Si tout est suffisant, réponds exactement :
 
 RÉFÉRENCES VALIDÉES
-Les références correspondent à la source.
+Les références correspondent aux sources utilisées.
 
 Sinon commence exactement par :
 
 À REVOIR
-
-Indique UNE seule information bibliographique à vérifier.
-Ne donne pas directement la bonne réponse si l'élève peut
-la retrouver lui-même dans la source.
 """
 
             contenu = f"""
-SOURCE :
-{st.session_state.source}
+PARCOURS :
+{st.session_state.parcours}
 
-RÉFÉRENCES DONNÉES PAR L'ÉLÈVE :
+DOCUMENTS / RECHERCHES :
+{contexte_documentaire()}
 
-Auteur :
-{st.session_state.ref_auteur}
-
-Titre :
-{st.session_state.ref_titre}
-
-Média :
-{st.session_state.ref_media}
-
-Date :
-{st.session_state.ref_date}
+RÉFÉRENCES :
+{references_affichees()}
 """
 
             try:
@@ -1978,7 +2081,6 @@ Date :
                 st.rerun()
 
             except Exception as e:
-
                 st.error("Erreur pendant la vérification.")
                 st.code(str(e))
 
@@ -2005,255 +2107,115 @@ Date :
             st.write(st.session_state.feedback_references)
 
             if st.button("Corriger mes références"):
-
                 st.session_state.etape = "references"
                 st.rerun()
 
 
 # =========================================================
-# ÉTAPE 7 - ASSEMBLAGE
+# ASSEMBLAGE
 # =========================================================
 
 elif st.session_state.etape == "chronique_assemblee":
 
-    st.subheader("Étape 7 - Chronique assemblée")
+    st.subheader("Chronique assemblée")
 
     st.success(
-        "La chronique a été assemblée uniquement avec les textes "
-        "que tu as écrits."
+        "La chronique a été assemblée uniquement "
+        "avec les textes que tu as écrits."
     )
 
     st.text_area(
         "Ta chronique complète :",
         value=st.session_state.chronique,
-        height=450,
+        height=460,
         disabled=True
     )
 
-    st.info(
-        "Il reste un dernier contrôle indépendant avant validation."
-    )
-
     if st.button("🔎 Lancer le contrôle final"):
-
         st.session_state.etape = "controle_final"
         st.rerun()
 
 
 # =========================================================
-# ÉTAPE 8 - CONTRÔLE FINAL INDÉPENDANT
+# CONTRÔLE FINAL
 # =========================================================
 
 elif st.session_state.etape == "controle_final":
 
-    st.subheader("Étape 8 - Contrôle final")
+    st.subheader("Contrôle final")
 
     if not st.session_state.feedback_final:
 
         instructions = """
-Tu es chargé du CONTRÔLE FINAL INDÉPENDANT
-d'une chronique Radio ISTJ écrite par un élève de collège.
-
-Tu disposes :
-- du niveau ;
-- de la source originale ;
-- de la chronique complète de l'élève.
+Tu réalises le CONTRÔLE FINAL INDÉPENDANT
+d'une chronique Radio ISTJ.
 
 Tu ne réécris rien.
 Tu ne cherches pas à améliorer le texte.
-Tu détectes uniquement les problèmes qui rendent réellement
-une correction obligatoire avant validation.
 
-=========================================================
+Tu vérifies uniquement les problèmes qui rendent
+une correction réellement nécessaire.
+
+Vérifie :
+
 1. FIDÉLITÉ
-=========================================================
+Toute information factuelle doit être justifiable
+par les documents et recherches fournis.
 
-Toute information factuelle de la chronique doit être justifiable
-par la source.
-
-Signale :
-- information contraire à la source ;
-- déformation réelle ;
-- attribution incorrecte ;
-- relation de cause à effet absente ;
-- affirmation plus forte que ce que permet la source.
-
-RÈGLE PRIORITAIRE :
 SÉLECTIONNER N'EST PAS DÉFORMER.
 
-Une chronique n'est pas un résumé exhaustif.
+L'omission d'informations n'est pas une erreur.
 
-L'omission d'informations présentes dans la source n'est PAS
-une erreur de fidélité.
+2. INFORMATION INVENTÉE
+Signale un fait qui n'apparaît pas dans les recherches
+et ne peut pas raisonnablement en être déduit.
 
-Si l'élève sélectionne certaines causes, certains exemples,
-certaines conséquences ou certains détails exacts,
-cette sélection est fidèle tant qu'il ne prétend pas
-qu'il s'agit de la liste complète.
+3. EXACTITUDE
+Vérifie les nombres, dates, lieux, noms et données présentes.
 
-N'infère jamais une exclusivité qui n'est pas écrite.
-
-« à cause de X » ne signifie pas
-« uniquement à cause de X ».
-
-Distingue toujours :
-
-INFORMATION NON FIDÈLE :
-ce que dit l'élève ne correspond pas à la source.
-
-INFORMATION SÉLECTIONNÉE :
-l'élève utilise seulement certaines informations exactes.
-Ce n'est PAS un problème.
-
-QUALITÉ RADIO INSUFFISANTE :
-l'information est correcte mais réellement trop vague
-pour permettre à l'auditeur de comprendre.
-
-
-=========================================================
-2. EXACTITUDE
-=========================================================
-
-Vérifie particulièrement :
-- nombres ;
-- statistiques ;
-- dates ;
-- durées ;
-- quantités ;
-- lieux ;
-- noms propres ;
-- noms d'espèces ;
-- organismes ;
-- unités.
-
-Une donnée présente doit être exacte.
-
-Son absence n'est pas une erreur si l'élève n'en avait pas besoin.
-
-
-=========================================================
-3. INFORMATION INVENTÉE
-=========================================================
-
-Signale un fait présenté comme réel s'il :
-- n'apparaît pas dans la source ;
-- ne peut pas raisonnablement en être déduit ;
-- ajoute une cause, une conséquence ou une explication absente.
-
-Ne confonds pas un fait inventé avec une courte appréciation
-personnelle clairement identifiable.
-
-
-=========================================================
 4. PLAGIAT
-=========================================================
+Les faits précis peuvent être identiques.
+Signale seulement une reprise vraiment trop proche
+d'une phrase ou construction de la source.
 
-Nombres, dates, noms, lieux, termes scientifiques et autres faits précis
-peuvent rester identiques.
-
-Signale un risque réel de plagiat seulement lorsqu'un passage reprend :
-- une phrase entière ou presque entière ;
-- la même construction avec presque les mêmes mots ;
-- plusieurs expressions caractéristiques dans le même ordre ;
-- une formulation clairement reconnaissable de la source.
-
-
-=========================================================
 5. CLARTÉ
-=========================================================
+Signale uniquement ce qui gêne réellement
+la compréhension à la première écoute.
 
-Signale CLARTÉ uniquement si le passage est réellement :
-- difficile à comprendre ;
-- contradictoire ;
-- ambigu au point de gêner le sens ;
-- incohérent ;
-- difficilement compréhensible à la première écoute.
-
-Une phrase simple, scolaire ou imparfaite n'est pas un problème
-si elle est compréhensible.
-
-
-=========================================================
 6. QUALITÉ RADIO
-=========================================================
+Utilise un seuil minimal :
+court, clair, concis.
 
-Il s'agit d'un seuil MINIMAL et non d'une recherche de perfection.
+Une phrase simple ou scolaire n'est pas un problème
+si elle reste compréhensible.
 
-Pour 6e-5e :
-accepte :
-- phrases courtes ;
-- vocabulaire simple ;
-- organisation simple ;
-- sélection de 2 ou 3 idées essentielles.
+Dans le parcours libre :
+vérifie également que la chronique reste globalement
+cohérente avec l'angle choisi.
 
-Une introduction est suffisante si :
-- le sujet est identifiable ;
-- au moins une information permet de comprendre son intérêt.
+Ne transforme pas les principes journalistiques
+en grille rigide.
 
-IMPORTANT :
-une introduction correcte de niveau 6e-5e ne doit pas être rejetée
-parce qu'elle n'explique pas encore un mécanisme, une cause,
-un chiffre ou un détail qui peut naturellement être présenté
-dans le développement.
+Une accroche spectaculaire, des images mentales
+ou un habillage sonore sont des possibilités,
+pas des obligations.
 
-Un développement est suffisant s'il permet de comprendre
-quelques idées essentielles sélectionnées.
+7. NIVEAU
 
-Une conclusion peut tenir en une phrase si elle apporte
-une véritable idée de fin.
+6e-5e :
+accepte un texte simple et quelques idées essentielles.
 
-Pour 4e-3e :
-attends davantage de précision, de liens et de développement.
+4e-3e :
+attends davantage de précision et d'explication,
+sans exiger l'exhaustivité.
 
-Même en 4e-3e :
-n'exige jamais l'exhaustivité.
+Avant de signaler un problème demande-toi :
 
-Une idée peut être suffisamment expliquée par son principe essentiel.
+« Cette correction est-elle indispensable,
+ou rendrait-elle seulement la chronique meilleure ? »
 
-N'exige pas une procédure technique complète simplement
-parce qu'elle existe dans la source.
-
-Un instrument, une étape opératoire, un chiffre
-ou un détail de procédure ne doit devenir obligatoire
-que si son absence empêche réellement de comprendre le principe.
-
-Avant de signaler QUALITÉ RADIO INSUFFISANTE,
-demande-toi :
-
-« Ce passage empêche-t-il réellement un auditeur de ce niveau
-de comprendre suffisamment l'idée,
-ou est-ce que je souhaiterais seulement qu'il soit plus détaillé ? »
-
-Si le passage pourrait simplement être meilleur :
-NE LE SIGNALE PAS.
-
-
-=========================================================
-7. RÉFÉRENCES
-=========================================================
-
-Signale uniquement :
-- références absentes ;
-- information bibliographique essentielle disponible mais manquante ;
-- référence fausse ;
-- référence ne permettant pas d'identifier la source.
-
-Si les références sont correctes :
-ne les mentionne pas dans le retour.
-
-
-=========================================================
-8. DÉCISION
-=========================================================
-
-Pour chaque problème envisagé :
-
-1. Quelle règle est réellement violée ?
-2. La modification est-elle indispensable à la validation
-   ou rendrait-elle seulement le texte meilleur ?
-
-Si elle rendrait seulement la chronique meilleure :
-NE SIGNALE PAS.
+Si elle rendrait seulement le texte meilleur :
+NE LA SIGNALE PAS.
 
 Si aucune correction obligatoire ne subsiste,
 réponds EXACTEMENT :
@@ -2261,41 +2223,37 @@ réponds EXACTEMENT :
 VALIDÉ
 La chronique peut passer à l'étape suivante.
 
-Si au moins une correction obligatoire subsiste,
-commence EXACTEMENT par :
+Sinon commence EXACTEMENT par :
 
 À CORRIGER
 
-Puis utilise uniquement ce format :
+Puis utilise :
 
-Problème : [PLAGIAT / INFORMATION NON FIDÈLE /
-INFORMATION INVENTÉE / CLARTÉ /
-QUALITÉ RADIO INSUFFISANTE / RÉFÉRENCE]
+Problème : [type]
 
-Passage concerné : "[citation exacte du passage de l'élève]"
+Passage concerné : "[citation exacte]"
 
-Explication : [explication courte compréhensible par un collégien]
+Explication : [courte]
 
-Consigne : [ce que l'élève doit vérifier ou corriger lui-même,
-sans écrire la nouvelle formulation]
+Consigne : [ce que l'élève doit corriger lui-même]
 
-S'il existe plusieurs vrais problèmes, sépare-les.
-
-Ne mentionne aucun élément correct.
 Ne rédige jamais la correction.
 """
 
         contenu = f"""
-NIVEAU DE L'ÉLÈVE :
+NIVEAU :
 {st.session_state.niveau}
+
+PARCOURS :
+{st.session_state.parcours}
 
 FORMAT :
 {st.session_state.nombre_voix}
 
-SOURCE ORIGINALE :
-{st.session_state.source}
+DOCUMENTS / RECHERCHES :
+{contexte_documentaire()}
 
-CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
+CHRONIQUE :
 {st.session_state.chronique}
 """
 
@@ -2313,11 +2271,7 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
             st.rerun()
 
         except Exception as e:
-
-            st.error(
-                "Une erreur s'est produite pendant le contrôle final."
-            )
-
+            st.error("Erreur pendant le contrôle final.")
             st.code(str(e))
 
     else:
@@ -2326,10 +2280,6 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
             st.session_state.feedback_final,
             "VALIDÉ"
         ):
-
-            # -------------------------------------------------
-            # CHRONIQUE VALIDÉE
-            # -------------------------------------------------
 
             st.success("✅ Chronique validée")
 
@@ -2340,22 +2290,13 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
             st.text_area(
                 "Chronique validée :",
                 value=st.session_state.chronique,
-                height=420,
+                height=430,
                 disabled=True
             )
 
             st.divider()
 
-            # -------------------------------------------------
-            # PDF
-            # -------------------------------------------------
-
             st.subheader("📄 PDF Radio ISTJ")
-
-            st.write(
-                "Ta chronique est prête. "
-                "Tu peux maintenant générer sa version PDF prête à imprimer."
-            )
 
             try:
 
@@ -2369,11 +2310,6 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
                     use_container_width=True
                 )
 
-                st.caption(
-                    "Le PDF contient uniquement la chronique validée "
-                    "et les références fournies par l'élève."
-                )
-
             except Exception as e:
 
                 st.error(
@@ -2383,10 +2319,6 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
                 st.code(str(e))
 
         else:
-
-            # -------------------------------------------------
-            # CORRECTIONS APRÈS CONTRÔLE FINAL
-            # -------------------------------------------------
 
             st.error(
                 "La chronique doit encore être corrigée."
@@ -2399,7 +2331,7 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
             st.divider()
 
             st.write(
-                "**Choisis la partie que tu dois corriger :**"
+                "**Choisis la partie à corriger :**"
             )
 
             col1, col2 = st.columns(2)
@@ -2411,7 +2343,6 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
                     st.session_state.feedback_introduction = ""
                     st.session_state.feedback_final = ""
                     st.session_state.etape = "introduction"
-
                     st.rerun()
 
                 if st.button("Corriger la conclusion"):
@@ -2419,7 +2350,6 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
                     st.session_state.feedback_conclusion = ""
                     st.session_state.feedback_final = ""
                     st.session_state.etape = "conclusion"
-
                     st.rerun()
 
             with col2:
@@ -2429,7 +2359,6 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
                     st.session_state.feedback_developpement = ""
                     st.session_state.feedback_final = ""
                     st.session_state.etape = "developpement"
-
                     st.rerun()
 
                 if st.button("Corriger les références"):
@@ -2437,5 +2366,4 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
                     st.session_state.feedback_references = ""
                     st.session_state.feedback_final = ""
                     st.session_state.etape = "references"
-
                     st.rerun()
