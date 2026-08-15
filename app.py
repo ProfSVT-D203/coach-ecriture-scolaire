@@ -31,6 +31,9 @@ if "idees" not in st.session_state:
 if "vocabulaire" not in st.session_state:
     st.session_state.vocabulaire = ""
 
+if "feedback_comprehension" not in st.session_state:
+    st.session_state.feedback_comprehension = ""
+
 
 # =========================================================
 # TITRE
@@ -82,7 +85,6 @@ if st.session_state.etape == "accueil":
             st.session_state.niveau = niveau
             st.session_state.nombre_voix = nombre_voix
             st.session_state.source = source
-
             st.session_state.etape = "comprehension"
 
             st.rerun()
@@ -139,19 +141,18 @@ elif st.session_state.etape == "comprehension":
             )
 
         else:
-            # Sauvegarde des réponses de l'élève
             st.session_state.sujet = sujet
             st.session_state.idees = idees
             st.session_state.vocabulaire = vocabulaire
+            st.session_state.feedback_comprehension = ""
 
-            # Passage à l'étape suivante
             st.session_state.etape = "analyse_comprehension"
 
             st.rerun()
 
 
 # =========================================================
-# ÉTAPE 2 — AVANT ANALYSE IA
+# ÉTAPE 2 — VÉRIFICATION DE LA COMPRÉHENSION
 # =========================================================
 
 elif st.session_state.etape == "analyse_comprehension":
@@ -173,33 +174,142 @@ elif st.session_state.etape == "analyse_comprehension":
 
     st.divider()
 
-    st.info(
-        "La prochaine étape sera la vérification de ta compréhension "
-        "par le Coach."
-    )
-
     if st.button("Modifier mes réponses"):
         st.session_state.etape = "comprehension"
         st.rerun()
+
     st.divider()
 
-    if st.button("Tester la connexion OpenAI"):
+    if st.session_state.feedback_comprehension == "":
 
-        try:
-            client = OpenAI(
-                api_key=st.secrets["OPENAI_API_KEY"]
-            )
+        st.info(
+            "La prochaine étape est la vérification de ta compréhension par le Coach."
+        )
 
-            response = client.responses.create(
-                model="gpt-5-mini",
-                input=(
-                    "Réponds uniquement par cette phrase : "
-                    "Connexion API réussie."
+        if st.button("Vérifier ma compréhension"):
+
+            try:
+                client = OpenAI(
+                    api_key=st.secrets["OPENAI_API_KEY"]
                 )
+
+                instructions = """
+Tu es le Coach d'écriture pédagogique de Radio ISTJ.
+
+Tu vérifies uniquement l'étape de compréhension d'un élève de collège
+à partir de la source fournie.
+
+RÈGLE FONDAMENTALE :
+Tu ne rédiges jamais la chronique à la place de l'élève.
+
+Tu dois vérifier :
+1. si le sujet principal est correctement compris ;
+2. si chacune des 2 ou 3 idées importantes est fidèle à la source ;
+3. si une idée contient une erreur ou une imprécision factuelle importante ;
+4. si les difficultés de vocabulaire signalées doivent être expliquées.
+
+RÈGLE PRIORITAIRE :
+Sélectionner n'est pas déformer.
+
+L'élève n'a pas besoin de reprendre toutes les informations de la source.
+Si une idée choisie est exacte, ne la considère pas comme insuffisante
+simplement parce que la source contient davantage de détails.
+
+Distingue absolument :
+- une information fausse ou déformée ;
+- une information correcte mais sélectionnée ;
+- une information réellement trop vague pour montrer que l'idée est comprise.
+
+Pour un élève de niveau 6e-5e :
+- accepte des formulations simples ;
+- accepte une sélection de 2 ou 3 idées essentielles ;
+- n'exige pas des nombres, dates, exemples ou détails inutiles
+  si l'idée est déjà comprise.
+
+Pour un élève de niveau 4e-3e :
+- attends davantage de précision et d'explication ;
+- mais n'exige jamais l'exhaustivité de la source.
+
+Si un mot ou un passage est signalé comme incompris :
+- explique-le simplement avec un vocabulaire adapté au niveau ;
+- reste fidèle au sens qu'il possède dans la source.
+
+Si une réponse doit être corrigée :
+- indique ce qui est déjà correct ;
+- identifie UNE seule difficulté prioritaire ;
+- pose UNE question ciblée qui aide l'élève à retrouver lui-même
+  l'information dans la source ;
+- ne donne pas directement la réponse si elle peut être retrouvée dans la source ;
+- ne propose jamais une phrase prête à copier.
+
+Si toutes les réponses montrent une compréhension suffisante,
+réponds exactement :
+
+COMPRÉHENSION VALIDÉE
+Tu as bien compris les idées essentielles de la source.
+Tu peux passer à la construction du plan.
+
+Sinon, commence exactement par :
+
+À REVOIR
+
+Puis donne un retour court et adapté à un collégien.
+"""
+
+                input_text = f"""
+NIVEAU DE L'ÉLÈVE :
+{st.session_state.niveau}
+
+SOURCE :
+{st.session_state.source}
+
+RÉPONSE DE L'ÉLÈVE — SUJET PRINCIPAL :
+{st.session_state.sujet}
+
+RÉPONSE DE L'ÉLÈVE — IDÉES IMPORTANTES :
+{st.session_state.idees}
+
+RÉPONSE DE L'ÉLÈVE — MOTS OU PASSAGES DIFFICILES :
+{st.session_state.vocabulaire}
+"""
+
+                with st.spinner("Le Coach vérifie ta compréhension..."):
+
+                    response = client.responses.create(
+                        model="gpt-5.6-luna",
+                        instructions=instructions,
+                        input=input_text
+                    )
+
+                st.session_state.feedback_comprehension = response.output_text
+                st.rerun()
+
+            except Exception as e:
+                st.error(
+                    "Une erreur s'est produite pendant la vérification."
+                )
+                st.code(str(e))
+
+    else:
+
+        st.subheader("Retour du Coach")
+
+        st.write(
+            st.session_state.feedback_comprehension
+        )
+
+        if st.session_state.feedback_comprehension.startswith(
+            "COMPRÉHENSION VALIDÉE"
+        ):
+            st.success(
+                "La compréhension est validée."
             )
 
-            st.success(response.output_text)
+        else:
+            st.warning(
+                "Corrige tes réponses avant de poursuivre."
+            )
 
-        except Exception as e:
-            st.error("La connexion à OpenAI a échoué.")
-            st.code(str(e))
+            if st.button("Reprendre mes réponses"):
+                st.session_state.etape = "comprehension"
+                st.rerun()
