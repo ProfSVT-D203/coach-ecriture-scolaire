@@ -2776,6 +2776,85 @@ vérifie auteur, titre, média et date
 par rapport à la source fournie.
 
 =========================================================
+RÈGLE ABSOLUE SUR LE TITRE D'UN ARTICLE
+=========================================================
+
+Pour identifier le titre d'un article,
+utilise en priorité le TITRE EXPLICITEMENT AFFICHÉ
+dans le document ou sur la page de l'article.
+
+Tu ne dois JAMAIS déduire,
+reconstituer ou contester le titre
+à partir du texte contenu dans l'URL.
+
+Une URL peut conserver :
+- un ancien titre ;
+- une ancienne formulation ;
+- un ancien bilan ;
+- un ancien nombre ;
+- un ancien état de l'actualité ;
+
+même si l'article a ensuite été mis à jour
+et que son titre visible a changé.
+
+Le texte contenu dans une URL
+n'est donc PAS une référence fiable
+pour déterminer le titre actuel de l'article.
+
+Si le titre explicitement affiché dans le document
+est différent du texte apparaissant dans l'URL :
+
+LE TITRE AFFICHÉ DANS LE DOCUMENT FAIT FOI.
+
+Tu dois l'accepter comme titre de référence
+si l'élève l'a correctement recopié.
+
+=========================================================
+EXEMPLE OBLIGATOIRE
+=========================================================
+
+Supposons qu'un document affiche le titre :
+
+« Un puissant séisme de magnitude 7,7
+fait au moins 40 morts »
+
+mais que l'URL du même article contienne encore :
+
+« fait-au-moins-deux-morts-alerte-au-tsunami-levee »
+
+Tu ne dois PAS considérer cela comme une incohérence
+dans les références de l'élève.
+
+L'URL peut avoir été créée
+lors d'une version antérieure de l'article.
+
+Si l'élève a recopié le titre visible :
+
+« Un puissant séisme de magnitude 7,7
+fait au moins 40 morts »
+
+ce titre doit être considéré comme correct.
+
+Ne demande PAS à l'élève de vérifier
+le titre à partir du texte de l'URL.
+
+=========================================================
+AUTRES INFORMATIONS DE RÉFÉRENCE
+=========================================================
+
+Pour l'auteur :
+utilise l'auteur ou l'organisme explicitement affiché.
+
+Pour le média :
+utilise le nom du média explicitement identifiable.
+
+Pour la date :
+utilise la date explicitement affichée dans la source.
+
+Une éventuelle modification ultérieure de l'article
+ne rend pas automatiquement la date de publication incorrecte.
+
+=========================================================
 PARCOURS LIBRE
 =========================================================
 
@@ -2887,10 +2966,15 @@ essaie de vérifier qu'elle peut être retrouvée
 avec suffisamment d'informations :
 
 - auteur ou organisme si disponible ;
-- titre ;
+- titre affiché dans le document ;
 - média ou site ;
 - date si disponible ;
 - lien si l'élève l'a.
+
+RAPPEL :
+
+Le TITRE AFFICHÉ a priorité
+sur le texte éventuellement contenu dans l'URL.
 
 N'exige pas un élément qui n'existe pas.
 
@@ -2927,7 +3011,9 @@ Puis :
 - signale seulement les problèmes réellement importants ;
 - ne transforme pas l'exercice en bibliographie universitaire ;
 - ne demande pas des précisions inutiles ;
-- n'invente jamais une source à la place de l'élève.
+- n'invente jamais une source à la place de l'élève ;
+- ne conteste jamais un titre affiché uniquement
+  parce que l'URL contient une autre formulation.
 """
 
             contenu = f"""
@@ -3094,7 +3180,26 @@ L'absence d'un détail n'est pas une erreur
 simplement parce qu'il existe dans une source.
 
 =========================================================
-4. PLAGIAT
+4. TITRES ET URL
+=========================================================
+
+Lorsqu'une référence comporte un article :
+
+le titre explicitement affiché dans la source
+a priorité sur le texte contenu dans l'URL.
+
+Une URL peut conserver un ancien titre
+après la mise à jour d'un article.
+
+Ne signale donc PAS une erreur
+si le titre affiché dans le document
+est correctement recopié par l'élève,
+même si l'URL contient une formulation différente.
+
+Ne reconstitue jamais le titre à partir de l'URL.
+
+=========================================================
+5. PLAGIAT
 =========================================================
 
 Les faits précis peuvent naturellement être identiques
@@ -3106,7 +3211,7 @@ Signale seulement une reprise vraiment trop proche :
 - formulation clairement reconnaissable de la source.
 
 =========================================================
-5. CLARTÉ
+6. CLARTÉ
 =========================================================
 
 Signale uniquement ce qui gêne réellement
@@ -3116,7 +3221,7 @@ Une phrase simple ou scolaire n'est pas un problème
 si elle reste compréhensible.
 
 =========================================================
-6. RÉPÉTITIONS ENTRE LES PARTIES
+7. RÉPÉTITIONS ENTRE LES PARTIES
 =========================================================
 
 Compare explicitement :
@@ -3148,7 +3253,7 @@ une petite répétition de vocabulaire ou d'idée est acceptable.
 Ne signale que les répétitions vraiment gênantes.
 
 =========================================================
-7. META-DIALOGUE AVEC LE COACH
+8. META-DIALOGUE AVEC LE COACH
 =========================================================
 
 C'est une vérification OBLIGATOIRE.
@@ -3193,7 +3298,7 @@ dans son texte si elle est utile.
 Tu ne rédiges jamais cette nouvelle formulation à sa place.
 
 =========================================================
-8. QUALITÉ RADIO
+9. QUALITÉ RADIO
 =========================================================
 
 Utilise un seuil minimal :
@@ -3215,7 +3320,7 @@ sont des possibilités,
 pas des obligations.
 
 =========================================================
-9. SOURCES
+10. SOURCES
 =========================================================
 
 Les sources sont transmises séparément.
@@ -3237,7 +3342,7 @@ Une interview seulement prévue
 ne doit pas être présentée comme une source déjà utilisée.
 
 =========================================================
-10. NIVEAU
+11. NIVEAU
 =========================================================
 
 Pour 6e-5e :
@@ -3257,7 +3362,7 @@ attends davantage :
 sans exiger l'exhaustivité.
 
 =========================================================
-11. TEST DE DÉCISION
+12. TEST DE DÉCISION
 =========================================================
 
 Avant de signaler chaque problème,
@@ -3273,7 +3378,7 @@ NE LA SIGNALE PAS.
 Ne cherche pas une chronique parfaite.
 
 =========================================================
-12. VALIDATION
+13. VALIDATION
 =========================================================
 
 Si aucune correction obligatoire ne subsiste,
@@ -3283,7 +3388,7 @@ VALIDÉ
 La chronique peut passer à l'étape suivante.
 
 =========================================================
-13. SI UNE CORRECTION EST NÉCESSAIRE
+14. SI UNE CORRECTION EST NÉCESSAIRE
 =========================================================
 
 Commence EXACTEMENT par :
