@@ -1,5 +1,20 @@
+import io
+import html
+
 import streamlit as st
 from openai import OpenAI
+
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    KeepTogether,
+)
 
 
 # =========================================================
@@ -16,7 +31,7 @@ MODEL = "gpt-5.6-luna"
 
 
 # =========================================================
-# FONCTIONS
+# FONCTIONS GÉNÉRALES
 # =========================================================
 
 def initialiser(cle, valeur=""):
@@ -91,6 +106,278 @@ def invalider_apres(partie):
 
     st.session_state.chronique = ""
     st.session_state.feedback_final = ""
+
+
+# =========================================================
+# FONCTIONS PDF
+# =========================================================
+
+def texte_pdf(texte):
+    """
+    Protège le texte de l'élève pour ReportLab sans le réécrire.
+    Les retours à la ligne sont conservés.
+    """
+
+    texte = str(texte)
+
+    # Quelques caractères susceptibles de poser problème
+    # avec les polices PDF standard.
+    remplacements = {
+        "\u202f": " ",
+        "\u00a0": " ",
+        "\u2011": "-",
+        "\u2013": "-",
+        "\u2014": "-",
+        "\u2026": "...",
+    }
+
+    for ancien, nouveau in remplacements.items():
+        texte = texte.replace(ancien, nouveau)
+
+    texte = html.escape(texte)
+
+    return texte.replace("\n", "<br/>")
+
+
+def pied_de_page(canvas, doc):
+    canvas.saveState()
+
+    largeur, hauteur = A4
+
+    canvas.setStrokeColor(colors.HexColor("#CCCCCC"))
+    canvas.setLineWidth(0.5)
+
+    canvas.line(
+        2 * cm,
+        1.45 * cm,
+        largeur - 2 * cm,
+        1.45 * cm
+    )
+
+    canvas.setFont("Helvetica", 8)
+    canvas.setFillColor(colors.HexColor("#666666"))
+
+    canvas.drawString(
+        2 * cm,
+        1 * cm,
+        "Radio ISTJ - Coach d'écriture"
+    )
+
+    canvas.drawRightString(
+        largeur - 2 * cm,
+        1 * cm,
+        f"Page {doc.page}"
+    )
+
+    canvas.restoreState()
+
+
+def generer_pdf():
+    """
+    Génère le PDF à partir UNIQUEMENT des textes déjà validés
+    et stockés dans la session.
+    """
+
+    buffer = io.BytesIO()
+
+    document = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=2 * cm,
+        leftMargin=2 * cm,
+        topMargin=2 * cm,
+        bottomMargin=2 * cm,
+        title="Chronique Radio ISTJ",
+        author="Radio ISTJ"
+    )
+
+    styles = getSampleStyleSheet()
+
+    style_radio = ParagraphStyle(
+        "Radio",
+        parent=styles["Title"],
+        fontName="Helvetica-Bold",
+        fontSize=22,
+        leading=26,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#153A63"),
+        spaceAfter=4
+    )
+
+    style_sous_titre = ParagraphStyle(
+        "SousTitre",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=11,
+        leading=14,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#555555"),
+        spaceAfter=18
+    )
+
+    style_section = ParagraphStyle(
+        "Section",
+        parent=styles["Heading2"],
+        fontName="Helvetica-Bold",
+        fontSize=13,
+        leading=16,
+        textColor=colors.HexColor("#153A63"),
+        spaceBefore=10,
+        spaceAfter=8
+    )
+
+    style_texte = ParagraphStyle(
+        "TexteChronique",
+        parent=styles["BodyText"],
+        fontName="Helvetica",
+        fontSize=11,
+        leading=16,
+        spaceAfter=12
+    )
+
+    style_reference = ParagraphStyle(
+        "References",
+        parent=styles["BodyText"],
+        fontName="Helvetica",
+        fontSize=9.5,
+        leading=13,
+        textColor=colors.HexColor("#444444"),
+        spaceAfter=4
+    )
+
+    elements = []
+
+    # -----------------------------------------------------
+    # EN-TÊTE
+    # -----------------------------------------------------
+
+    elements.append(
+        Paragraph(
+            "RADIO ISTJ",
+            style_radio
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            "Chronique élève - version validée",
+            style_sous_titre
+        )
+    )
+
+    infos = (
+        f"<b>Niveau :</b> {texte_pdf(st.session_state.niveau)}"
+        f"&nbsp;&nbsp;&nbsp;&nbsp;"
+        f"<b>Format :</b> {texte_pdf(st.session_state.nombre_voix)}"
+    )
+
+    elements.append(
+        Paragraph(
+            infos,
+            style_sous_titre
+        )
+    )
+
+    elements.append(Spacer(1, 0.2 * cm))
+
+    # -----------------------------------------------------
+    # CHRONIQUE
+    # -----------------------------------------------------
+
+    elements.append(
+        Paragraph(
+            "Chronique",
+            style_section
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            texte_pdf(st.session_state.introduction),
+            style_texte
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            texte_pdf(st.session_state.developpement),
+            style_texte
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            texte_pdf(st.session_state.conclusion),
+            style_texte
+        )
+    )
+
+    elements.append(Spacer(1, 0.35 * cm))
+
+    # -----------------------------------------------------
+    # RÉFÉRENCES
+    # -----------------------------------------------------
+
+    bloc_references = []
+
+    bloc_references.append(
+        Paragraph(
+            "Références",
+            style_section
+        )
+    )
+
+    bloc_references.append(
+        Paragraph(
+            f"<b>Auteur :</b> "
+            f"{texte_pdf(st.session_state.ref_auteur)}",
+            style_reference
+        )
+    )
+
+    bloc_references.append(
+        Paragraph(
+            f"<b>Titre :</b> "
+            f"{texte_pdf(st.session_state.ref_titre)}",
+            style_reference
+        )
+    )
+
+    bloc_references.append(
+        Paragraph(
+            f"<b>Média :</b> "
+            f"{texte_pdf(st.session_state.ref_media)}",
+            style_reference
+        )
+    )
+
+    bloc_references.append(
+        Paragraph(
+            f"<b>Date :</b> "
+            f"{texte_pdf(st.session_state.ref_date)}",
+            style_reference
+        )
+    )
+
+    elements.append(
+        KeepTogether(bloc_references)
+    )
+
+    # -----------------------------------------------------
+    # CRÉATION
+    # -----------------------------------------------------
+
+    document.build(
+        elements,
+        onFirstPage=pied_de_page,
+        onLaterPages=pied_de_page
+    )
+
+    pdf = buffer.getvalue()
+
+    buffer.close()
+
+    return pdf
 
 
 # =========================================================
@@ -239,7 +526,7 @@ st.title("🎙️ Coach d'écriture Radio ISTJ")
 
 
 # =========================================================
-# ÉTAPE 0 — ACCUEIL
+# ÉTAPE 0 - ACCUEIL
 # =========================================================
 
 if st.session_state.etape == "accueil":
@@ -290,12 +577,12 @@ if st.session_state.etape == "accueil":
 
 
 # =========================================================
-# ÉTAPE 1 — COMPRÉHENSION
+# ÉTAPE 1 - COMPRÉHENSION
 # =========================================================
 
 elif st.session_state.etape == "comprehension":
 
-    st.subheader("Étape 1 — Comprendre la source")
+    st.subheader("Étape 1 - Comprendre la source")
 
     st.write(
         f"**Niveau :** {st.session_state.niveau}  \n"
@@ -355,7 +642,7 @@ elif st.session_state.etape == "comprehension":
 
 
 # =========================================================
-# ÉTAPE 1B — CONTRÔLE COMPRÉHENSION
+# ÉTAPE 1B - CONTRÔLE COMPRÉHENSION
 # =========================================================
 
 elif st.session_state.etape == "analyse_comprehension":
@@ -490,12 +777,12 @@ VOCABULAIRE / DIFFICULTÉS :
 
 
 # =========================================================
-# ÉTAPE 2 — PLAN
+# ÉTAPE 2 - PLAN
 # =========================================================
 
 elif st.session_state.etape == "plan":
 
-    st.subheader("Étape 2 — Construire le plan")
+    st.subheader("Étape 2 - Construire le plan")
 
     st.write(
         "Indique ce que tu veux faire dans chaque partie. "
@@ -505,25 +792,25 @@ elif st.session_state.etape == "plan":
     st.divider()
 
     plan_introduction = st.text_area(
-        "Introduction — Que veux-tu présenter au début ?",
+        "Introduction - Que veux-tu présenter au début ?",
         value=st.session_state.plan_introduction
     )
 
     plan_developpement = st.text_area(
-        "Développement — Quelles idées veux-tu expliquer, et dans quel ordre ?",
+        "Développement - Quelles idées veux-tu expliquer, et dans quel ordre ?",
         value=st.session_state.plan_developpement,
         height=170
     )
 
     plan_conclusion = st.text_area(
-        "Conclusion — Sur quelle idée veux-tu terminer ?",
+        "Conclusion - Sur quelle idée veux-tu terminer ?",
         value=st.session_state.plan_conclusion
     )
 
     if st.session_state.nombre_voix != "1 voix":
 
         plan_repartition = st.text_area(
-            f"Répartition des {st.session_state.nombre_voix} — "
+            f"Répartition des {st.session_state.nombre_voix} - "
             "Qui intervient dans les différentes parties ?",
             value=st.session_state.plan_repartition,
             height=140
@@ -571,7 +858,7 @@ elif st.session_state.etape == "plan":
 
 
 # =========================================================
-# ÉTAPE 2B — CONTRÔLE PLAN
+# ÉTAPE 2B - CONTRÔLE PLAN
 # =========================================================
 
 elif st.session_state.etape == "plan_enregistre":
@@ -720,12 +1007,12 @@ RÉPARTITION DES VOIX :
 
 
 # =========================================================
-# ÉTAPE 3 — INTRODUCTION
+# ÉTAPE 3 - INTRODUCTION
 # =========================================================
 
 elif st.session_state.etape == "introduction":
 
-    st.subheader("Étape 3 — Rédiger l'introduction")
+    st.subheader("Étape 3 - Rédiger l'introduction")
 
     st.write(
         "Écris maintenant toi-même ton introduction."
@@ -770,7 +1057,7 @@ elif st.session_state.etape == "introduction":
 
 
 # =========================================================
-# ÉTAPE 3B — CONTRÔLE INTRODUCTION
+# ÉTAPE 3B - CONTRÔLE INTRODUCTION
 # =========================================================
 
 elif st.session_state.etape == "controle_introduction":
@@ -809,15 +1096,6 @@ Une ou deux phrases simples peuvent suffire.
 
 Si le sujet est identifiable et qu'au moins un élément permet
 de comprendre son intérêt, l'introduction DOIT être validée.
-
-Par exemple, dire qu'il s'agit :
-- d'une nouvelle technique contre une maladie ;
-- d'une découverte ;
-- d'un événement particulier ;
-- d'un phénomène remarquable ;
-- d'une situation présentant un enjeu,
-
-peut suffire à montrer l'intérêt du sujet.
 
 NE BLOQUE JAMAIS une introduction correcte de niveau 6e-5e
 simplement parce qu'elle n'explique pas encore :
@@ -955,12 +1233,12 @@ INTRODUCTION ÉCRITE PAR L'ÉLÈVE :
 
 
 # =========================================================
-# ÉTAPE 4 — DÉVELOPPEMENT
+# ÉTAPE 4 - DÉVELOPPEMENT
 # =========================================================
 
 elif st.session_state.etape == "developpement":
 
-    st.subheader("Étape 4 — Rédiger le développement")
+    st.subheader("Étape 4 - Rédiger le développement")
 
     st.write(
         "Écris maintenant le développement avec tes propres phrases."
@@ -1002,7 +1280,7 @@ elif st.session_state.etape == "developpement":
 
 
 # =========================================================
-# ÉTAPE 4B — CONTRÔLE DÉVELOPPEMENT
+# ÉTAPE 4B - CONTRÔLE DÉVELOPPEMENT
 # =========================================================
 
 elif st.session_state.etape == "controle_developpement":
@@ -1041,78 +1319,58 @@ PAS l'ensemble des informations disponibles dans la source.
 
 Le développement n'a pas à reprendre tout l'article.
 
-RÈGLE PRIORITAIRE :
-
 SÉLECTIONNER N'EST PAS DÉFORMER.
-
-L'élève reste libre de sélectionner les informations qu'il utilise,
-à condition que celles qu'il présente soient fidèles à la source.
 
 Une information exacte ne devient pas insuffisante simplement parce
 que la source permettrait de donner davantage de détails.
 
 
 =========================================================
-2. FIDÉLITÉ À LA SOURCE
+2. FIDÉLITÉ
 =========================================================
-
-Vérifie que les informations écrites par l'élève sont compatibles
-avec la source.
 
 Une correction est nécessaire si une information :
 - est fausse ;
 - inverse le sens de la source ;
 - déforme réellement une idée ;
 - présente comme certain quelque chose qui ne l'est pas ;
-- ajoute un fait absent de la source ;
-- crée une relation de cause à effet absente de la source.
+- ajoute un fait absent ;
+- crée une relation de cause à effet absente.
 
-En revanche, NE CORRIGE PAS une information simplement parce que :
-- elle pourrait être plus détaillée ;
-- un terme plus précis existe dans la source ;
-- la source contient un nombre que l'élève n'a pas utilisé ;
-- la source donne plusieurs exemples et l'élève n'en retient qu'un ;
-- la source explique plusieurs causes et l'élève en sélectionne certaines ;
-- une explication technique plus complète serait possible.
+NE CORRIGE PAS simplement parce que :
+- l'information pourrait être plus détaillée ;
+- un terme plus précis existe ;
+- un nombre est absent ;
+- plusieurs exemples existent ;
+- une procédure plus complète est disponible.
 
 
 =========================================================
 3. NIVEAU 6e-5e
 =========================================================
 
-Pour un élève de 6e-5e :
+Accepte :
+- phrases courtes ;
+- vocabulaire simple ;
+- organisation simple ;
+- quelques informations essentielles ;
+- 2 ou 3 idées correctement expliquées.
 
-- accepte des phrases courtes ;
-- accepte un vocabulaire simple ;
-- accepte une organisation simple ;
-- accepte une sélection de quelques informations essentielles ;
-- accepte 2 ou 3 idées correctement expliquées ;
-- n'exige pas de vocabulaire scientifique complexe si des mots simples
-  permettent de comprendre correctement l'idée.
-
-Quelques informations simples et exactes peuvent suffire.
-
-N'exige PAS systématiquement :
+N'exige pas systématiquement :
 - plusieurs causes ;
-- des nombres ;
-- des dates ;
-- des durées ;
+- nombres ;
+- dates ;
+- durées ;
 - tous les exemples ;
 - toutes les étapes ;
-- toutes les conséquences ;
-- tous les détails scientifiques ou techniques.
-
-Si l'auditeur de ce niveau peut comprendre suffisamment les idées
-prévues dans le plan, le développement doit être accepté.
+- détails scientifiques ou techniques.
 
 
 =========================================================
 4. NIVEAU 4e-3e
 =========================================================
 
-Pour un élève de 4e-3e :
-
-attends davantage :
+Attends davantage :
 - de précision ;
 - d'explication ;
 - de vocabulaire adapté ;
@@ -1120,12 +1378,8 @@ attends davantage :
 - de progression logique.
 
 Une idée prévue dans le plan peut nécessiter une explication
-si l'élève se contente d'affirmer un résultat sans permettre
+si l'élève affirme seulement un résultat sans permettre
 de comprendre suffisamment le phénomène.
-
-Par exemple, si le plan prévoit explicitement d'expliquer POURQUOI
-un phénomène se produit, constater seulement qu'il se produit
-peut être insuffisant.
 
 Mais même en 4e-3e :
 
@@ -1133,27 +1387,24 @@ N'EXIGE JAMAIS L'EXHAUSTIVITÉ.
 
 
 =========================================================
-5. INTERPRÉTATION DU PLAN — CORRECTIF IMPORTANT
+5. INTERPRÉTATION DU PLAN
 =========================================================
 
-Le plan constitue un guide de rédaction.
+Le plan est un guide de rédaction.
 
 Mais tu ne dois PAS interpréter chaque verbe du plan
 comme une obligation de fournir tous les détails techniques possibles.
 
-En particulier :
-
 LE MOT « COMMENT » NE SIGNIFIE PAS AUTOMATIQUEMENT
 « DÉCRIRE TOUTE LA PROCÉDURE TECHNIQUE ».
 
-Lorsque le plan prévoit par exemple :
-- « expliquer comment une technique agit » ;
-- « expliquer comment un traitement est utilisé » ;
-- « expliquer comment un produit est placé » ;
-- « expliquer comment une action est réalisée » ;
+Lorsque le plan prévoit :
+- expliquer comment une technique agit ;
+- expliquer comment un traitement est utilisé ;
+- expliquer comment un produit est placé ;
+- expliquer comment une action est réalisée ;
 
-tu dois déterminer quel PRINCIPE est nécessaire
-à la compréhension de l'auditeur.
+cherche d'abord le PRINCIPE nécessaire à la compréhension.
 
 Une explication conceptuelle simple peut suffire.
 
@@ -1161,20 +1412,18 @@ N'exige PAS automatiquement :
 - les instruments ;
 - les appareils ;
 - le matériel ;
-- tous les gestes techniques ;
+- tous les gestes ;
 - toutes les étapes opératoires ;
-- l'ordre complet de la procédure ;
-- les détails de positionnement ;
-- tous les nombres liés à la procédure.
+- tous les détails de positionnement ;
+- tous les nombres de la procédure.
 
-Ces informations ne deviennent obligatoires que dans DEUX cas :
+Ces informations deviennent obligatoires seulement si :
 
-1. le plan de l'élève les mentionne explicitement ;
+1. le plan les mentionne explicitement ;
 
 OU
 
-2. leur absence empêche réellement l'auditeur de comprendre
-   le principe essentiel de l'idée prévue.
+2. leur absence empêche réellement de comprendre le principe.
 
 EXEMPLE DE RÉFÉRENCE :
 
@@ -1185,80 +1434,58 @@ DÉVELOPPEMENT :
 « Des bâtonnets avec du radium 224 sont placés directement
 dans la tumeur. »
 
-Pour un élève de niveau 4e-3e,
-cette information peut être suffisante pour faire comprendre
+Pour un élève de 4e-3e,
+cette information peut suffire à faire comprendre
 le principe de l'implantation.
 
-Tu ne dois PAS exiger automatiquement :
+N'exige pas automatiquement :
 - l'endoscope ;
 - l'aiguille ;
 - le nombre exact de bâtonnets ;
-- la manière précise de les positionner ;
+- leur positionnement précis ;
 - la procédure opératoire complète.
 
-Ces éléments sont des détails supplémentaires
-si le principe essentiel est déjà compris.
-
-Autre principe :
-
-« EXPLIQUER COMMENT » PEUT ÊTRE SATISFAIT
-PAR UNE EXPLICATION DU PRINCIPE.
-
-Il n'impose pas une description procédurale exhaustive.
-
-Ne transforme jamais un plan validé en cahier des charges
-technique plus détaillé après le début de la rédaction.
+« Expliquer comment » peut être satisfait
+par une explication du principe.
 
 
 =========================================================
-6. RÈGLE D'ARRÊT — TRÈS IMPORTANTE
+6. RÈGLE D'ARRÊT
 =========================================================
 
 Tu dois savoir ARRÊTER la correction.
 
-« Davantage de précision » ne signifie PAS demander progressivement
-tous les détails disponibles dans la source.
-
 Dès que les idées prévues dans le plan :
 - sont présentes ;
-- sont fidèles à la source ;
-- sont suffisamment expliquées pour être comprises par un auditeur
-  du niveau concerné ;
+- sont fidèles ;
+- sont suffisamment expliquées pour le niveau ;
 
 le développement DOIT être validé.
 
-Ne demande PAS ensuite :
-- un instrument utilisé ;
-- un chiffre ;
-- une date ;
-- une durée ;
-- une étape technique ;
-- un détail de procédure ;
-- un exemple supplémentaire ;
-- une précision scientifique supplémentaire ;
-- une information secondaire,
+Ne demande pas ensuite :
+- instrument ;
+- chiffre ;
+- date ;
+- durée ;
+- étape technique ;
+- détail de procédure ;
+- exemple supplémentaire ;
+- précision scientifique supplémentaire
 
 simplement parce que cette information existe dans la source.
 
-Un tel détail ne doit être demandé que si son absence empêche
-réellement de comprendre une idée prévue dans le plan.
-
 
 =========================================================
-7. TEST DE DÉCISION OBLIGATOIRE
+7. TEST DE DÉCISION
 =========================================================
 
-Avant chaque réponse « À REVOIR », pose-toi obligatoirement
-ces questions :
+Avant chaque « À REVOIR », demande-toi :
 
 1. L'idée demandée par le plan est-elle présente ?
+2. Son principe essentiel est-il compréhensible ?
+3. L'information supplémentaire est-elle indispensable ?
 
-2. Le principe essentiel de cette idée est-il compréhensible ?
-
-3. L'information supplémentaire que je souhaite demander
-   est-elle indispensable à cette compréhension ?
-
-Si les réponses sont :
+Si :
 
 1. OUI
 2. OUI
@@ -1266,159 +1493,67 @@ Si les réponses sont :
 
 alors tu DOIS valider cette idée.
 
-Tu ne peux pas répondre « À REVOIR » uniquement
-parce qu'une description plus complète serait possible.
-
-Pose-toi aussi cette question :
-
-« Sans l'information supplémentaire que je veux demander,
-une idée prévue dans le plan reste-t-elle réellement mal comprise
-pour un élève ou un auditeur de ce niveau ? »
-
-Si OUI :
-une correction peut être nécessaire.
-
-Si NON :
-tu dois valider le développement.
-
-Autrement dit :
-
-UNE INFORMATION QUI POURRAIT ENRICHIR LE TEXTE
-N'EST PAS FORCÉMENT UNE INFORMATION NÉCESSAIRE.
-
 Ne confonds jamais :
-- « cette chronique pourrait être plus détaillée »
+
+« le texte pourrait être plus détaillé »
+
 avec
-- « cette chronique est insuffisante ».
 
-ATTENTION :
+« le texte est insuffisant ».
 
-Si tu constates toi-même dans ton analyse que :
-- toutes les idées du plan sont présentes ;
-- elles sont fidèles à la source ;
-- elles sont suffisamment expliquées ;
-
-tu ne peux PAS ensuite répondre « À REVOIR » simplement pour demander
-un enrichissement supplémentaire.
-
-Dans ce cas, tu DOIS valider.
+Si tu constates toi-même que toutes les idées du plan
+sont présentes, fidèles et suffisamment expliquées,
+tu DOIS valider.
 
 
 =========================================================
-8. RESPECT DU PLAN
+8. QUALITÉ RADIO
 =========================================================
 
-Le plan constitue le contrat de rédaction principal.
+Le développement doit être compréhensible à la première écoute.
 
-Vérifie que les idées que l'élève avait prévu de développer
-sont effectivement présentes.
+Une formulation simple, scolaire ou imparfaite
+peut être acceptée si elle reste claire.
 
-Mais évalue la FONCTION de chaque idée du plan,
-pas une interprétation maximaliste de ses verbes.
-
-Si le plan prévoit seulement de présenter une information,
-une présentation claire peut suffire.
-
-Si le plan prévoit « expliquer comment »,
-vérifie d'abord que le PRINCIPE est expliqué.
-
-Ne demande une procédure détaillée que si elle est réellement
-nécessaire à la compréhension ou explicitement demandée par le plan.
-
-Si le plan prévoit explicitement :
-- d'expliquer pourquoi ;
-- de comparer ;
-- d'établir un lien de cause et conséquence ;
-
-alors vérifie que cette relation est réellement comprise.
-
-Mais n'utilise jamais la source pour agrandir progressivement
-les exigences du plan.
-
-NE TRANSFORME PAS après coup un plan validé
-en un plan plus détaillé.
+Ne cherche pas une chronique parfaite.
 
 
 =========================================================
-9. QUALITÉ RADIO
+9. PLUSIEURS VOIX
 =========================================================
 
-Vérifie que le développement est compréhensible à la première écoute.
+Pour 2 ou 3 voix :
+- les répliques doivent être identifiables ;
+- la répartition doit rester cohérente ;
+- l'ensemble doit être compréhensible.
 
-Ne recherche pas une chronique parfaite.
-
-Une formulation :
-- simple ;
-- scolaire ;
-- courte ;
-- imparfaite stylistiquement
-
-peut être acceptée si elle reste claire et adaptée au niveau.
-
-Ne demande pas une reformulation uniquement pour rendre
-le texte plus élégant.
-
-Ne demande une correction de clarté que si une phrase est réellement :
-- difficile à comprendre ;
-- ambiguë ;
-- contradictoire ;
-- incohérente ;
-- trop vague pour transmettre l'idée prévue.
-
-
-=========================================================
-10. PLUSIEURS VOIX
-=========================================================
-
-Pour une chronique à 2 ou 3 voix :
-
-- vérifie que les répliques sont identifiables ;
-- vérifie que la répartition reste cohérente avec le plan ;
-- vérifie que l'ensemble reste compréhensible à l'écoute.
-
-N'exige PAS :
+N'exige pas :
 - une alternance parfaite ;
-- le même nombre de phrases pour chaque voix ;
-- la même durée de parole pour chaque voix.
-
-La répartition peut être déséquilibrée si elle reste cohérente
-et exploitable à l'oral.
+- le même nombre de phrases ;
+- la même durée de parole.
 
 
 =========================================================
-11. PLAGIAT / REFORMULATION
+10. PLAGIAT
 =========================================================
 
-Vérifie que l'élève formule réellement les informations
-avec ses propres phrases.
+Les noms, dates, nombres, lieux et termes scientifiques nécessaires
+peuvent être identiques à ceux de la source.
 
-Les éléments factuels suivants peuvent naturellement être identiques
-à ceux de la source :
-- noms propres ;
-- noms scientifiques ;
-- lieux ;
-- dates ;
-- nombres ;
-- unités ;
-- termes techniques nécessaires.
-
-Ne signale un risque de plagiat que si l'élève reprend :
-- une phrase entière ou presque entière ;
-- la même construction avec presque les mêmes mots ;
-- plusieurs expressions caractéristiques de la source dans le même ordre.
-
-Ne demande jamais une reformulation simplement parce qu'un terme
-scientifique nécessaire apparaît aussi dans la source.
+Signale seulement :
+- phrase entière ou presque entière copiée ;
+- même construction avec presque les mêmes mots ;
+- plusieurs expressions caractéristiques dans le même ordre.
 
 
 =========================================================
-12. SI LE DÉVELOPPEMENT EST SUFFISANT
+11. VALIDATION
 =========================================================
 
 Si les idées prévues dans le plan sont :
 - présentes ;
 - fidèles ;
-- suffisamment expliquées pour le niveau ;
+- suffisamment expliquées ;
 - compréhensibles à l'oral ;
 - suffisamment reformulées ;
 
@@ -1430,46 +1565,27 @@ Tu peux passer à la conclusion.
 
 
 =========================================================
-13. SI UNE CORRECTION EST RÉELLEMENT NÉCESSAIRE
+12. CORRECTION
 =========================================================
 
-Commence EXACTEMENT par :
+Si une correction est réellement nécessaire,
+commence EXACTEMENT par :
 
 À REVOIR
 
-Puis respecte IMPÉRATIVEMENT ces règles :
+Puis :
+- dis brièvement ce qui fonctionne ;
+- choisis UNE seule difficulté ;
+- explique pourquoi elle bloque réellement la compréhension ;
+- ne rédige pas la correction ;
+- pose UNE seule question ciblée ;
+- laisse l'élève corriger lui-même.
 
-- commence par dire brièvement ce qui fonctionne déjà ;
-- choisis UNE SEULE difficulté prioritaire ;
-- explique pourquoi cette difficulté empêche réellement
-  le développement de remplir son rôle ;
-- ne donne pas la phrase corrigée ;
-- ne donne pas de formulation prête à copier ;
-- ne donne pas directement l'information que l'élève doit retrouver
-  si elle peut être retrouvée dans la source ;
-- pose UNE SEULE question ciblée permettant à l'élève
-  de chercher lui-même la correction ;
-- ne traite pas plusieurs difficultés à la fois.
+Après correction, applique à nouveau la règle d'arrêt.
 
-Une fois la difficulté corrigée, réévalue l'ensemble du développement
-avec la RÈGLE D'ARRÊT.
+Ne cherche pas immédiatement un nouveau détail.
 
-Ne cherche pas immédiatement un nouveau détail à demander.
-
-Si le développement est désormais suffisant :
-VALIDE-LE.
-
-
-=========================================================
-PRINCIPE FINAL
-=========================================================
-
-Ton objectif n'est pas de produire le développement le plus complet
-possible.
-
-Ton objectif est de déterminer si le développement écrit PAR L'ÉLÈVE
-est suffisamment fidèle, expliqué, clair et adapté à son niveau
-pour constituer une chronique radio de collège.
+PRINCIPE FINAL :
 
 SÉLECTIONNER N'EST PAS DÉFORMER.
 
@@ -1543,12 +1659,12 @@ DÉVELOPPEMENT ÉCRIT PAR L'ÉLÈVE :
 
 
 # =========================================================
-# ÉTAPE 5 — CONCLUSION
+# ÉTAPE 5 - CONCLUSION
 # =========================================================
 
 elif st.session_state.etape == "conclusion":
 
-    st.subheader("Étape 5 — Rédiger la conclusion")
+    st.subheader("Étape 5 - Rédiger la conclusion")
 
     st.write(
         "Écris maintenant toi-même la conclusion de ta chronique."
@@ -1588,7 +1704,7 @@ elif st.session_state.etape == "conclusion":
 
 
 # =========================================================
-# ÉTAPE 5B — CONTRÔLE CONCLUSION
+# ÉTAPE 5B - CONTRÔLE CONCLUSION
 # =========================================================
 
 elif st.session_state.etape == "controle_conclusion":
@@ -1709,12 +1825,12 @@ CONCLUSION ÉCRITE PAR L'ÉLÈVE :
 
 
 # =========================================================
-# ÉTAPE 6 — RÉFÉRENCES
+# ÉTAPE 6 - RÉFÉRENCES
 # =========================================================
 
 elif st.session_state.etape == "references":
 
-    st.subheader("Étape 6 — Retrouver les références")
+    st.subheader("Étape 6 - Retrouver les références")
 
     st.write(
         "Retrouve toi-même ces informations dans ta source."
@@ -1774,7 +1890,7 @@ elif st.session_state.etape == "references":
 
 
 # =========================================================
-# ÉTAPE 6B — CONTRÔLE RÉFÉRENCES
+# ÉTAPE 6B - CONTRÔLE RÉFÉRENCES
 # =========================================================
 
 elif st.session_state.etape == "controle_references":
@@ -1878,9 +1994,7 @@ Date :
             if st.button("Assembler ma chronique"):
 
                 st.session_state.chronique = assembler_chronique()
-
                 st.session_state.feedback_final = ""
-
                 st.session_state.etape = "chronique_assemblee"
 
                 st.rerun()
@@ -1897,12 +2011,12 @@ Date :
 
 
 # =========================================================
-# ÉTAPE 7 — ASSEMBLAGE
+# ÉTAPE 7 - ASSEMBLAGE
 # =========================================================
 
 elif st.session_state.etape == "chronique_assemblee":
 
-    st.subheader("Étape 7 — Chronique assemblée")
+    st.subheader("Étape 7 - Chronique assemblée")
 
     st.success(
         "La chronique a été assemblée uniquement avec les textes "
@@ -1927,12 +2041,12 @@ elif st.session_state.etape == "chronique_assemblee":
 
 
 # =========================================================
-# ÉTAPE 8 — CONTRÔLE FINAL INDÉPENDANT
+# ÉTAPE 8 - CONTRÔLE FINAL INDÉPENDANT
 # =========================================================
 
 elif st.session_state.etape == "controle_final":
 
-    st.subheader("Étape 8 — Contrôle final")
+    st.subheader("Étape 8 - Contrôle final")
 
     if not st.session_state.feedback_final:
 
@@ -1995,6 +2109,7 @@ QUALITÉ RADIO INSUFFISANTE :
 l'information est correcte mais réellement trop vague
 pour permettre à l'auditeur de comprendre.
 
+
 =========================================================
 2. EXACTITUDE
 =========================================================
@@ -2015,6 +2130,7 @@ Une donnée présente doit être exacte.
 
 Son absence n'est pas une erreur si l'élève n'en avait pas besoin.
 
+
 =========================================================
 3. INFORMATION INVENTÉE
 =========================================================
@@ -2026,6 +2142,7 @@ Signale un fait présenté comme réel s'il :
 
 Ne confonds pas un fait inventé avec une courte appréciation
 personnelle clairement identifiable.
+
 
 =========================================================
 4. PLAGIAT
@@ -2040,6 +2157,7 @@ Signale un risque réel de plagiat seulement lorsqu'un passage reprend :
 - plusieurs expressions caractéristiques dans le même ordre ;
 - une formulation clairement reconnaissable de la source.
 
+
 =========================================================
 5. CLARTÉ
 =========================================================
@@ -2053,6 +2171,7 @@ Signale CLARTÉ uniquement si le passage est réellement :
 
 Une phrase simple, scolaire ou imparfaite n'est pas un problème
 si elle est compréhensible.
+
 
 =========================================================
 6. QUALITÉ RADIO
@@ -2089,8 +2208,6 @@ attends davantage de précision, de liens et de développement.
 Même en 4e-3e :
 n'exige jamais l'exhaustivité.
 
-IMPORTANT POUR LE DÉVELOPPEMENT 4e-3e :
-
 Une idée peut être suffisamment expliquée par son principe essentiel.
 
 N'exige pas une procédure technique complète simplement
@@ -2110,6 +2227,7 @@ ou est-ce que je souhaiterais seulement qu'il soit plus détaillé ? »
 Si le passage pourrait simplement être meilleur :
 NE LE SIGNALE PAS.
 
+
 =========================================================
 7. RÉFÉRENCES
 =========================================================
@@ -2122,6 +2240,7 @@ Signale uniquement :
 
 Si les références sont correctes :
 ne les mentionne pas dans le retour.
+
 
 =========================================================
 8. DÉCISION
@@ -2208,6 +2327,10 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
             "VALIDÉ"
         ):
 
+            # -------------------------------------------------
+            # CHRONIQUE VALIDÉE
+            # -------------------------------------------------
+
             st.success("✅ Chronique validée")
 
             st.write(
@@ -2217,20 +2340,61 @@ CHRONIQUE COMPLÈTE DE L'ÉLÈVE :
             st.text_area(
                 "Chronique validée :",
                 value=st.session_state.chronique,
-                height=450,
+                height=420,
                 disabled=True
             )
 
-            st.info(
-                "Prochaine étape du projet : génération automatique "
-                "du PDF Radio ISTJ prêt à imprimer."
+            st.divider()
+
+            # -------------------------------------------------
+            # PDF
+            # -------------------------------------------------
+
+            st.subheader("📄 PDF Radio ISTJ")
+
+            st.write(
+                "Ta chronique est prête. "
+                "Tu peux maintenant générer sa version PDF prête à imprimer."
             )
+
+            try:
+
+                pdf = generer_pdf()
+
+                st.download_button(
+                    label="📥 Télécharger le PDF Radio ISTJ",
+                    data=pdf,
+                    file_name="chronique_radio_istj.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
+
+                st.caption(
+                    "Le PDF contient uniquement la chronique validée "
+                    "et les références fournies par l'élève."
+                )
+
+            except Exception as e:
+
+                st.error(
+                    "Le PDF n'a pas pu être généré."
+                )
+
+                st.code(str(e))
 
         else:
 
-            st.error("La chronique doit encore être corrigée.")
+            # -------------------------------------------------
+            # CORRECTIONS APRÈS CONTRÔLE FINAL
+            # -------------------------------------------------
 
-            st.write(st.session_state.feedback_final)
+            st.error(
+                "La chronique doit encore être corrigée."
+            )
+
+            st.write(
+                st.session_state.feedback_final
+            )
 
             st.divider()
 
