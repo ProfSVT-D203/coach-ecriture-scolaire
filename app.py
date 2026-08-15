@@ -144,6 +144,8 @@ elif st.session_state.etape == "comprehension":
             st.session_state.sujet = sujet
             st.session_state.idees = idees
             st.session_state.vocabulaire = vocabulaire
+
+            # Une modification des réponses annule l'ancienne analyse.
             st.session_state.feedback_comprehension = ""
 
             st.session_state.etape = "analyse_comprehension"
@@ -183,7 +185,8 @@ elif st.session_state.etape == "analyse_comprehension":
     if st.session_state.feedback_comprehension == "":
 
         st.info(
-            "La prochaine étape est la vérification de ta compréhension par le Coach."
+            "La prochaine étape est la vérification de ta compréhension "
+            "par le Coach."
         )
 
         if st.button("Vérifier ma compréhension"):
@@ -196,64 +199,92 @@ elif st.session_state.etape == "analyse_comprehension":
                 instructions = """
 Tu es le Coach d'écriture pédagogique de Radio ISTJ.
 
-Tu vérifies uniquement l'étape de compréhension d'un élève de collège
-à partir de la source fournie.
+Tu vérifies UNIQUEMENT la compréhension d'une source par un élève
+de collège.
 
-RÈGLE FONDAMENTALE :
+RÈGLE ABSOLUE :
 Tu ne rédiges jamais la chronique à la place de l'élève.
+Tu ne fournis jamais une phrase corrigée prête à copier.
 
-Tu dois vérifier :
+OBJECTIF :
+Vérifier :
 1. si le sujet principal est correctement compris ;
-2. si chacune des 2 ou 3 idées importantes est fidèle à la source ;
-3. si une idée contient une erreur ou une imprécision factuelle importante ;
-4. si les difficultés de vocabulaire signalées doivent être expliquées.
+2. si les 2 ou 3 idées choisies par l'élève sont fidèles à la source ;
+3. si une idée contient une erreur ou une déformation importante ;
+4. si une idée est réellement trop vague pour montrer sa compréhension ;
+5. si un mot ou passage signalé comme difficile doit être expliqué.
 
 RÈGLE PRIORITAIRE :
-Sélectionner n'est pas déformer.
+SÉLECTIONNER N'EST PAS DÉFORMER.
 
-L'élève n'a pas besoin de reprendre toutes les informations de la source.
-Si une idée choisie est exacte, ne la considère pas comme insuffisante
-simplement parce que la source contient davantage de détails.
+Une chronique n'est pas un résumé exhaustif.
 
-Distingue absolument :
-- une information fausse ou déformée ;
-- une information correcte mais sélectionnée ;
-- une information réellement trop vague pour montrer que l'idée est comprise.
+L'élève peut sélectionner seulement certaines informations de la source.
 
-Pour un élève de niveau 6e-5e :
+Une information exacte ne doit PAS être critiquée simplement :
+- parce qu'elle pourrait être plus détaillée ;
+- parce que la source contient d'autres informations ;
+- parce qu'un terme plus technique ou plus précis existe dans la source ;
+- parce qu'un détail supplémentaire pourrait être ajouté.
+
+Ne signale une imprécision que si elle change réellement le sens,
+rend l'idée trompeuse ou empêche de comprendre l'information essentielle.
+
+NIVEAU 6e-5e :
 - accepte des formulations simples ;
-- accepte une sélection de 2 ou 3 idées essentielles ;
-- n'exige pas des nombres, dates, exemples ou détails inutiles
-  si l'idée est déjà comprise.
+- accepte des reformulations avec les mots de l'élève ;
+- n'exige pas de vocabulaire technique inutile ;
+- n'exige pas de dates, nombres, lieux, exemples ou détails
+  lorsque l'idée essentielle est déjà correcte.
 
-Pour un élève de niveau 4e-3e :
+NIVEAU 4e-3e :
 - attends davantage de précision et d'explication ;
-- mais n'exige jamais l'exhaustivité de la source.
+- mais n'exige jamais l'exhaustivité.
 
-Si un mot ou un passage est signalé comme incompris :
-- explique-le simplement avec un vocabulaire adapté au niveau ;
-- reste fidèle au sens qu'il possède dans la source.
+VOCABULAIRE :
+Si l'élève signale un mot ou passage incompris,
+explique-le simplement et fidèlement à la source.
 
-Si une réponse doit être corrigée :
-- indique ce qui est déjà correct ;
-- identifie UNE seule difficulté prioritaire ;
-- pose UNE question ciblée qui aide l'élève à retrouver lui-même
-  l'information dans la source ;
-- ne donne pas directement la réponse si elle peut être retrouvée dans la source ;
-- ne propose jamais une phrase prête à copier.
-
-Si toutes les réponses montrent une compréhension suffisante,
-réponds exactement :
+SI TOUT EST CORRECT :
+Réponds exactement :
 
 COMPRÉHENSION VALIDÉE
 Tu as bien compris les idées essentielles de la source.
 Tu peux passer à la construction du plan.
 
-Sinon, commence exactement par :
+SI UNE CORRECTION EST NÉCESSAIRE :
+Commence exactement par :
 
 À REVOIR
 
-Puis donne un retour court et adapté à un collégien.
+Puis respecte IMPÉRATIVEMENT ces règles :
+
+- commence par dire brièvement ce qui est déjà correct ;
+- choisis UNE SEULE difficulté prioritaire ;
+- ne corrige pas les petits détails sans conséquence ;
+- indique quelle idée pose problème et pourquoi,
+  MAIS SANS DONNER L'INFORMATION EXACTE QUI DOIT REMPLACER L'ERREUR ;
+- pose UNE SEULE question ciblée permettant à l'élève
+  de retrouver lui-même la bonne information dans la source ;
+- ne révèle jamais la réponse dans ton explication avant de poser la question ;
+- ne cite pas une phrase de la source contenant directement la réponse ;
+- ne propose pas de formulation corrigée ;
+- ne traite pas plusieurs problèmes à la fois.
+
+EXEMPLE DE COMPORTEMENT INTERDIT :
+"L'élève dit que les tissus sont abîmés, mais la source dit
+qu'ils sont épargnés. Relis la source : sont-ils touchés ou épargnés ?"
+
+Cet exemple est INTERDIT parce qu'il donne déjà la réponse.
+
+COMPORTEMENT ATTENDU :
+"La deuxième idée contient une erreur concernant l'effet du traitement
+sur les tissus autour de la tumeur.
+
+Relis le passage qui explique la portée des particules :
+que dit-il sur les tissus autour de la tumeur ?"
+
+L'objectif est que l'élève retrouve et formule lui-même la correction.
 """
 
                 input_text = f"""
@@ -273,7 +304,9 @@ RÉPONSE DE L'ÉLÈVE — MOTS OU PASSAGES DIFFICILES :
 {st.session_state.vocabulaire}
 """
 
-                with st.spinner("Le Coach vérifie ta compréhension..."):
+                with st.spinner(
+                    "Le Coach vérifie ta compréhension..."
+                ):
 
                     response = client.responses.create(
                         model="gpt-5.6-luna",
@@ -281,7 +314,10 @@ RÉPONSE DE L'ÉLÈVE — MOTS OU PASSAGES DIFFICILES :
                         input=input_text
                     )
 
-                st.session_state.feedback_comprehension = response.output_text
+                st.session_state.feedback_comprehension = (
+                    response.output_text
+                )
+
                 st.rerun()
 
             except Exception as e:
@@ -294,18 +330,25 @@ RÉPONSE DE L'ÉLÈVE — MOTS OU PASSAGES DIFFICILES :
 
         st.subheader("Retour du Coach")
 
-        st.write(
-            st.session_state.feedback_comprehension
-        )
+        feedback = st.session_state.feedback_comprehension
 
-        if st.session_state.feedback_comprehension.startswith(
-            "COMPRÉHENSION VALIDÉE"
-        ):
-            st.success(
-                "La compréhension est validée."
+        # Affichage plus propre en cas de validation
+        if feedback.startswith("COMPRÉHENSION VALIDÉE"):
+
+            st.success("✅ Compréhension validée")
+
+            st.write(
+                "Tu as bien compris les idées essentielles de la source."
+            )
+
+            st.write(
+                "**Étape suivante : construire le plan.**"
             )
 
         else:
+
+            st.write(feedback)
+
             st.warning(
                 "Corrige tes réponses avant de poursuivre."
             )
