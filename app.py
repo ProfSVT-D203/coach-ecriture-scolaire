@@ -652,12 +652,14 @@ initialiser("parcours", "")
 initialiser("niveau", "6e-5e")
 initialiser("nombre_voix", "1 voix")
 
+# Parcours guidé
 initialiser("source")
 initialiser("sujet")
 initialiser("idees")
 initialiser("vocabulaire")
 initialiser("feedback_comprehension")
 
+# Parcours libre
 initialiser("libre_theme")
 initialiser("libre_sujet")
 initialiser("libre_angle")
@@ -673,12 +675,14 @@ initialiser("libre_where")
 initialiser("libre_when")
 initialiser("libre_whyhow")
 
+# Plan commun
 initialiser("plan_introduction")
 initialiser("plan_developpement")
 initialiser("plan_conclusion")
 initialiser("plan_repartition")
 initialiser("feedback_plan")
 
+# Rédaction commune
 initialiser("introduction")
 initialiser("feedback_introduction")
 
@@ -688,15 +692,18 @@ initialiser("feedback_developpement")
 initialiser("conclusion")
 initialiser("feedback_conclusion")
 
+# Références guidées
 initialiser("ref_auteur")
 initialiser("ref_titre")
 initialiser("ref_media")
 initialiser("ref_date")
 
+# Sources libres
 initialiser("libre_references")
 
 initialiser("feedback_references")
 
+# Final
 initialiser("chronique")
 initialiser("feedback_final")
 
@@ -2501,6 +2508,95 @@ Ne demande pas une information supplémentaire
 simplement pour enrichir le texte.
 
 =========================================================
+CONCLUSION ET RAPPEL DU PLAN
+=========================================================
+
+La conclusion doit respecter l'IDÉE GÉNÉRALE
+prévue dans le plan.
+
+Mais elle n'a PAS à répéter
+tous les détails déjà expliqués dans le développement.
+
+Si le plan prévoit de terminer sur une idée
+qui a déjà été expliquée dans le développement,
+un rappel plus général de cette idée peut suffire.
+
+La conclusion doit terminer la chronique,
+pas refaire le développement.
+
+=========================================================
+EXEMPLE OBLIGATOIRE
+=========================================================
+
+Supposons que le plan prévoit :
+
+« Terminer en rappelant que l'Indonésie reste particulièrement
+exposée aux séismes en raison de sa situation
+sur la ceinture de feu du Pacifique. »
+
+Et supposons que le développement a déjà expliqué :
+
+« Les séismes sont fréquents en Indonésie.
+Le pays se trouve sur la ceinture de feu du Pacifique,
+une région où l'activité sismique et volcanique est importante. »
+
+Alors une conclusion comme :
+
+« Ce séisme rappelle à quel point l'Indonésie
+reste exposée à ce type de catastrophe. »
+
+respecte suffisamment l'idée générale du plan.
+
+Tu ne dois PAS exiger que l'élève répète
+« ceinture de feu du Pacifique » dans la conclusion,
+car cette explication a déjà été donnée
+dans le développement.
+
+=========================================================
+VÉRIFIER CE QUI A DÉJÀ ÉTÉ DIT
+=========================================================
+
+Avant de refuser une conclusion
+parce qu'un élément précis du plan
+n'apparaît pas à nouveau dans la conclusion,
+regarde le DÉVELOPPEMENT DÉJÀ VALIDÉ.
+
+Pose-toi obligatoirement cette question :
+
+« Le détail demandé par le plan
+a-t-il déjà été correctement expliqué
+dans le développement ? »
+
+Si OUI :
+
+vérifie seulement que la conclusion
+rappelle clairement l'idée générale correspondante.
+
+Si elle le fait :
+TU DOIS considérer le plan comme respecté.
+
+Tu ne dois PAS obliger l'élève
+à répéter une explication déjà donnée.
+
+=========================================================
+RÉPÉTITIONS
+=========================================================
+
+Une conclusion peut rappeler brièvement
+une idée du développement.
+
+Mais elle ne doit pas répéter
+une explication entière avec le même niveau de détail.
+
+Un rappel général est donc préférable
+à une répétition complète.
+
+Ne sanctionne pas une conclusion
+parce qu'elle est plus générale que le plan,
+si le détail prévu par ce plan
+a déjà été correctement traité auparavant.
+
+=========================================================
 ATTENTION AU DIALOGUE AVEC LE COACH
 =========================================================
 
@@ -2530,6 +2626,24 @@ Mais sa réponse de confirmation ne doit pas ensuite
 faire partie du texte destiné à l'antenne.
 
 =========================================================
+RÈGLE D'ARRÊT
+=========================================================
+
+Si :
+
+- la conclusion apporte une vraie idée de fin ;
+- elle respecte l'idée générale du plan ;
+- les détails manquants dans la conclusion
+  ont déjà été correctement expliqués dans le développement ;
+- elle reste fidèle aux documents ;
+
+tu DOIS valider.
+
+Ne demande pas ensuite de répéter
+un détail simplement parce qu'il apparaissait
+dans la formulation du plan.
+
+=========================================================
 VALIDATION
 =========================================================
 
@@ -2551,11 +2665,17 @@ NIVEAU :
 PARCOURS :
 {st.session_state.parcours}
 
+FORMAT :
+{st.session_state.nombre_voix}
+
 DOCUMENTS / RECHERCHES :
 {contexte_documentaire()}
 
-PLAN :
+PLAN DE CONCLUSION :
 {st.session_state.plan_conclusion}
+
+DÉVELOPPEMENT DÉJÀ VALIDÉ :
+{st.session_state.developpement}
 
 CONCLUSION :
 {st.session_state.conclusion}
