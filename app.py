@@ -58,9 +58,6 @@ def est_valide(feedback, mot):
 
 
 def contexte_documentaire():
-    """
-    Renvoie le corpus documentaire utilisé pour vérifier les faits.
-    """
 
     if st.session_state.parcours == "guide":
         return st.session_state.source
@@ -84,7 +81,9 @@ INFORMATIONS RETENUES PAR L'ÉLÈVE :
 
 
 def references_affichees():
+
     if st.session_state.parcours == "guide":
+
         return (
             f"Auteur : {st.session_state.ref_auteur.strip()}\n"
             f"Titre : {st.session_state.ref_titre.strip()}\n"
@@ -142,6 +141,270 @@ def invalider_apres(partie):
 
     st.session_state.chronique = ""
     st.session_state.feedback_final = ""
+
+
+# =========================================================
+# SIDEBAR PÉDAGOGIQUE DU PARCOURS LIBRE
+# =========================================================
+
+def afficher_sidebar_libre():
+
+    if st.session_state.get("parcours") != "libre":
+        return
+
+    etape = st.session_state.get("etape", "")
+
+    with st.sidebar:
+
+        st.header("📻 Mémo écriture radio")
+
+        # -------------------------------------------------
+        # THÈME / SUJET / ANGLE
+        # -------------------------------------------------
+
+        if etape in [
+            "libre_cadrage",
+            "libre_angle_verif"
+        ]:
+
+            st.subheader("Thème → Sujet → Angle")
+
+            st.markdown(
+                """
+**Thème**
+
+Le domaine général dont tu veux parler.
+
+**Sujet**
+
+Une partie plus précise de ce thème.
+
+**Angle**
+
+L'aspect précis du sujet que tu choisis de traiter.
+
+👉 **L'angle donne la direction de tes recherches et de ta chronique.**
+
+Tu ne dois pas tout raconter.
+"""
+            )
+
+            st.divider()
+
+            st.caption("Exemple")
+
+            st.markdown(
+                """
+**Thème :**  
+La rentrée scolaire
+
+**Sujet :**  
+La rentrée 2026 dans notre collège
+
+**Angle :**  
+Les principaux changements de la rentrée 2026 dans notre collège
+"""
+            )
+
+            st.info(
+                "Un même sujet peut avoir plusieurs angles."
+            )
+
+        # -------------------------------------------------
+        # RECHERCHES / 5 W
+        # -------------------------------------------------
+
+        elif etape in [
+            "libre_recherches",
+            "libre_recherches_verif",
+            "libre_5w"
+        ]:
+
+            st.subheader("Garde ton angle en tête")
+
+            if st.session_state.libre_angle:
+
+                st.write(
+                    f"**Ton angle :**  \n"
+                    f"{st.session_state.libre_angle}"
+                )
+
+            st.markdown(
+                """
+Pendant tes recherches, demande-toi :
+
+**Est-ce que cette information sert vraiment mon angle ?**
+"""
+            )
+
+            st.divider()
+
+            st.subheader("Les 5 W")
+
+            st.markdown(
+                """
+**WHAT ?**  
+De quoi parle-t-on ?
+
+**WHO ?**  
+Qui est concerné ?
+
+**WHERE ?**  
+Où cela se passe-t-il ?
+
+**WHEN ?**  
+Quand ?
+
+**WHY / HOW ?**  
+Pourquoi ? Comment ?  
+Que faut-il faire comprendre ?
+"""
+            )
+
+            st.caption(
+                "Toutes ces questions ne sont pas forcément utiles "
+                "pour chaque chronique."
+            )
+
+        # -------------------------------------------------
+        # PLAN ET RÉDACTION
+        # -------------------------------------------------
+
+        elif etape in [
+            "plan",
+            "plan_enregistre",
+            "introduction",
+            "controle_introduction",
+            "developpement",
+            "controle_developpement",
+            "conclusion",
+            "controle_conclusion"
+        ]:
+
+            st.subheader("Les 3 C")
+
+            st.markdown(
+                """
+### Court
+Privilégie les phrases courtes.
+
+### Clair
+L'auditeur doit comprendre à la première écoute.
+
+### Concis
+Va à l'essentiel et utilise des mots précis.
+"""
+            )
+
+            st.divider()
+
+            st.markdown(
+                """
+**Une phrase = une idée**
+
+🎙️ Écris pour être entendu, pas seulement pour être lu.
+"""
+            )
+
+            if st.session_state.libre_angle:
+
+                st.divider()
+
+                st.subheader("Ton angle")
+
+                st.write(
+                    st.session_state.libre_angle
+                )
+
+                st.caption(
+                    "Ton texte doit rester centré sur cet angle."
+                )
+
+            st.divider()
+
+            st.subheader("Pense radio")
+
+            st.markdown(
+                """
+- Une bonne **accroche** peut donner envie d'écouter.
+- Tu peux créer des **images mentales**.
+- Tu peux imaginer des **sons ou un habillage sonore**.
+
+Ces éléments sont des possibilités, pas des obligations.
+"""
+            )
+
+        # -------------------------------------------------
+        # RÉFÉRENCES
+        # -------------------------------------------------
+
+        elif etape in [
+            "references",
+            "controle_references"
+        ]:
+
+            st.subheader("Tes sources")
+
+            st.markdown(
+                """
+Une information doit pouvoir être reliée à une source.
+
+Pour chaque source, essaie d'indiquer :
+
+- auteur ou organisme ;
+- titre ;
+- média ou site ;
+- date ;
+- lien si tu l'as.
+"""
+            )
+
+            st.divider()
+
+            if st.session_state.libre_angle:
+
+                st.caption("Angle de ta chronique")
+
+                st.write(
+                    st.session_state.libre_angle
+                )
+
+        # -------------------------------------------------
+        # ASSEMBLAGE / CONTRÔLE FINAL
+        # -------------------------------------------------
+
+        elif etape in [
+            "chronique_assemblee",
+            "controle_final"
+        ]:
+
+            st.subheader("Dernière vérification")
+
+            st.markdown(
+                """
+Ta chronique doit être :
+
+**✓ fidèle à tes recherches**
+
+**✓ centrée sur ton angle**
+
+**✓ claire à l'écoute**
+
+**✓ écrite avec tes propres phrases**
+
+**✓ courte et concise**
+"""
+            )
+
+            if st.session_state.libre_angle:
+
+                st.divider()
+
+                st.caption("Ton angle")
+
+                st.write(
+                    st.session_state.libre_angle
+                )
 
 
 # =========================================================
@@ -311,7 +574,8 @@ def generer_pdf():
 
         elements.append(
             Paragraph(
-                f"<b>Sujet :</b> {texte_pdf(st.session_state.libre_sujet)}",
+                f"<b>Sujet :</b> "
+                f"{texte_pdf(st.session_state.libre_sujet)}",
                 style_sous_titre
             )
         )
@@ -536,10 +800,12 @@ Cherche un seuil suffisant pour une chronique radio de collège.
 
 
 # =========================================================
-# TITRE
+# TITRE + SIDEBAR
 # =========================================================
 
 st.title("🎙️ Coach d'écriture Radio ISTJ")
+
+afficher_sidebar_libre()
 
 
 # =========================================================
@@ -757,6 +1023,7 @@ VOCABULAIRE :
                 with st.spinner(
                     "Le Coach vérifie ta compréhension..."
                 ):
+
                     st.session_state.feedback_comprehension = appel_ia(
                         instructions,
                         contenu
@@ -765,6 +1032,7 @@ VOCABULAIRE :
                 st.rerun()
 
             except Exception as e:
+
                 st.error("Erreur pendant la vérification.")
                 st.code(str(e))
 
@@ -778,15 +1046,20 @@ VOCABULAIRE :
             st.success("✅ Compréhension validée")
 
             if st.button("Construire mon plan"):
+
                 st.session_state.etape = "plan"
                 st.rerun()
 
         else:
 
             st.subheader("Retour du Coach")
-            st.write(st.session_state.feedback_comprehension)
+
+            st.write(
+                st.session_state.feedback_comprehension
+            )
 
             if st.button("Reprendre mes réponses"):
+
                 st.session_state.etape = "comprehension"
                 st.rerun()
 
@@ -806,18 +1079,15 @@ elif st.session_state.etape == "libre_cadrage":
     with st.expander("📻 Rappel : thème, sujet et angle"):
 
         st.write(
-            "**Thème** : le domaine général. "
-            "Exemples : sport, musique, environnement, sciences."
+            "**Thème** : le domaine général."
         )
 
         st.write(
-            "**Sujet** : un aspect précis de ce thème."
+            "**Sujet** : un aspect plus précis de ce thème."
         )
 
         st.write(
-            "**Angle** : le point de vue choisi, "
-            "c'est-à-dire ce que tu veux vraiment faire comprendre "
-            "ou découvrir à ton auditeur."
+            "**Angle** : l'aspect précis du sujet que tu choisis de traiter."
         )
 
         st.warning(
@@ -870,11 +1140,20 @@ elif st.session_state.etape == "libre_angle_verif":
 
     st.subheader("Ton projet de chronique")
 
-    st.write(f"**Thème :** {st.session_state.libre_theme}")
-    st.write(f"**Sujet :** {st.session_state.libre_sujet}")
-    st.write(f"**Angle :** {st.session_state.libre_angle}")
+    st.write(
+        f"**Thème :** {st.session_state.libre_theme}"
+    )
+
+    st.write(
+        f"**Sujet :** {st.session_state.libre_sujet}"
+    )
+
+    st.write(
+        f"**Angle :** {st.session_state.libre_angle}"
+    )
 
     if st.button("Modifier mon projet"):
+
         st.session_state.etape = "libre_cadrage"
         st.rerun()
 
@@ -974,34 +1253,14 @@ dans notre collège.
 
 Cet angle est suffisamment précis.
 
-Il indique clairement :
-- le sujet ;
-- le lieu ;
-- la période ;
-- la direction des recherches : les changements de cette rentrée.
-
 Tu dois donc le VALIDER.
 
-Tu ne dois PAS exiger à ce stade
-que l'élève sache déjà quels changements précis
-il découvrira pendant ses recherches.
-
 =========================================================
-5. NE PAS ORIENTER LE CONTENU À LA PLACE DE L'ÉLÈVE
+5. NE PAS ORIENTER LE CONTENU
 =========================================================
 
 Tu ne dois PAS proposer toi-même une liste de catégories,
 de sous-thèmes ou d'exemples qui ne viennent pas de l'élève.
-
-Par exemple, ne demande pas :
-
-« Veux-tu parler des horaires, des règles,
-des équipements ou des activités ? »
-
-si l'élève n'a pas lui-même évoqué ces éléments.
-
-Cette manière de faire orienterait artificiellement
-ses futures recherches.
 
 Tu peux uniquement poser une question ouverte
 si l'angle est réellement trop large.
@@ -1021,24 +1280,10 @@ Dans ce cas :
 
 - ne propose pas toi-même un angle ;
 - ne donne pas une liste de possibilités ;
-- pose UNE seule question ouverte
-  qui aide l'élève à préciser ce qu'il veut surtout raconter.
+- pose UNE seule question ouverte.
 
 =========================================================
-7. NE PAS RECHERCHER L'ORIGINALITÉ À TOUT PRIX
-=========================================================
-
-Un angle n'a pas besoin d'être spectaculaire,
-très original ou complexe.
-
-Un angle simple, clair et réalisable
-convient parfaitement à un collégien.
-
-Ne cherche pas à transformer un angle correct
-en angle plus sophistiqué simplement pour l'améliorer.
-
-=========================================================
-8. RÈGLE D'ARRÊT
+7. RÈGLE D'ARRÊT
 =========================================================
 
 Avant de répondre « À REVOIR », demande-toi :
@@ -1049,11 +1294,8 @@ de savoir dans quelle direction commencer ses recherches ? »
 Si OUI :
 tu dois valider l'angle.
 
-Ne demande pas une précision supplémentaire
-simplement parce qu'elle pourrait rendre l'angle encore plus précis.
-
 =========================================================
-9. VALIDATION
+8. VALIDATION
 =========================================================
 
 Si thème, sujet et angle forment un ensemble suffisamment clair
@@ -1102,7 +1344,11 @@ ANGLE :
                 st.rerun()
 
             except Exception as e:
-                st.error("Erreur pendant la vérification.")
+
+                st.error(
+                    "Erreur pendant la vérification."
+                )
+
                 st.code(str(e))
 
     else:
@@ -1115,15 +1361,20 @@ ANGLE :
             st.success("✅ Angle validé")
 
             if st.button("Passer aux recherches"):
+
                 st.session_state.etape = "libre_recherches"
                 st.rerun()
 
         else:
 
             st.subheader("Retour du Coach")
-            st.write(st.session_state.feedback_angle)
+
+            st.write(
+                st.session_state.feedback_angle
+            )
 
             if st.button("Revoir mon angle"):
+
                 st.session_state.etape = "libre_cadrage"
                 st.rerun()
 
@@ -1187,9 +1438,12 @@ elif st.session_state.etape == "libre_recherches_verif":
 
     st.subheader("Informations retenues")
 
-    st.write(st.session_state.libre_infos)
+    st.write(
+        st.session_state.libre_infos
+    )
 
     if st.button("Modifier mes recherches"):
+
         st.session_state.etape = "libre_recherches"
         st.rerun()
 
@@ -1268,7 +1522,11 @@ INFORMATIONS RETENUES :
                 st.rerun()
 
             except Exception as e:
-                st.error("Erreur pendant la vérification.")
+
+                st.error(
+                    "Erreur pendant la vérification."
+                )
+
                 st.code(str(e))
 
     else:
@@ -1280,16 +1538,23 @@ INFORMATIONS RETENUES :
 
             st.success("✅ Recherches validées")
 
-            if st.button("Préparer les informations essentielles"):
+            if st.button(
+                "Préparer les informations essentielles"
+            ):
+
                 st.session_state.etape = "libre_5w"
                 st.rerun()
 
         else:
 
             st.subheader("Retour du Coach")
-            st.write(st.session_state.feedback_recherches)
+
+            st.write(
+                st.session_state.feedback_recherches
+            )
 
             if st.button("Reprendre mes recherches"):
+
                 st.session_state.etape = "libre_recherches"
                 st.rerun()
 
@@ -1422,6 +1687,7 @@ elif st.session_state.etape == "plan":
         )
 
     else:
+
         plan_repartition = ""
 
     if st.button("Enregistrer mon plan"):
@@ -1433,7 +1699,8 @@ elif st.session_state.etape == "plan":
         ]):
 
             st.warning(
-                "Complète l'introduction, le développement et la conclusion."
+                "Complète l'introduction, le développement "
+                "et la conclusion."
             )
 
         elif (
@@ -1473,10 +1740,12 @@ elif st.session_state.etape == "plan_enregistre":
     st.write(st.session_state.plan_conclusion)
 
     if st.session_state.nombre_voix != "1 voix":
+
         st.write("### Répartition des voix")
         st.write(st.session_state.plan_repartition)
 
     if st.button("Modifier mon plan"):
+
         st.session_state.etape = "plan"
         st.rerun()
 
@@ -1569,7 +1838,11 @@ RÉPARTITION :
                 st.rerun()
 
             except Exception as e:
-                st.error("Erreur pendant la vérification.")
+
+                st.error(
+                    "Erreur pendant la vérification."
+                )
+
                 st.code(str(e))
 
     else:
@@ -1582,15 +1855,20 @@ RÉPARTITION :
             st.success("✅ Plan validé")
 
             if st.button("Rédiger mon introduction"):
+
                 st.session_state.etape = "introduction"
                 st.rerun()
 
         else:
 
             st.subheader("Retour du Coach")
-            st.write(st.session_state.feedback_plan)
+
+            st.write(
+                st.session_state.feedback_plan
+            )
 
             if st.button("Reprendre mon plan"):
+
                 st.session_state.etape = "plan"
                 st.rerun()
 
@@ -1618,7 +1896,10 @@ elif st.session_state.etape == "introduction":
         )
 
     st.write("### Ton plan")
-    st.write(st.session_state.plan_introduction)
+
+    st.write(
+        st.session_state.plan_introduction
+    )
 
     introduction = st.text_area(
         "Ton introduction :",
@@ -1629,21 +1910,32 @@ elif st.session_state.etape == "introduction":
     if st.button("Enregistrer mon introduction"):
 
         if not introduction.strip():
-            st.warning("Écris d'abord ton introduction.")
+
+            st.warning(
+                "Écris d'abord ton introduction."
+            )
 
         else:
+
             st.session_state.introduction = introduction
+
             invalider_apres("introduction")
+
             st.session_state.etape = "controle_introduction"
+
             st.rerun()
 
 
 elif st.session_state.etape == "controle_introduction":
 
     st.subheader("Ton introduction")
-    st.write(st.session_state.introduction)
+
+    st.write(
+        st.session_state.introduction
+    )
 
     if st.button("Modifier mon introduction"):
+
         st.session_state.etape = "introduction"
         st.rerun()
 
@@ -1728,7 +2020,11 @@ INTRODUCTION :
                 st.rerun()
 
             except Exception as e:
-                st.error("Erreur pendant la vérification.")
+
+                st.error(
+                    "Erreur pendant la vérification."
+                )
+
                 st.code(str(e))
 
     else:
@@ -1741,15 +2037,20 @@ INTRODUCTION :
             st.success("✅ Introduction validée")
 
             if st.button("Passer au développement"):
+
                 st.session_state.etape = "developpement"
                 st.rerun()
 
         else:
 
             st.subheader("Retour du Coach")
-            st.write(st.session_state.feedback_introduction)
+
+            st.write(
+                st.session_state.feedback_introduction
+            )
 
             if st.button("Corriger mon introduction"):
+
                 st.session_state.etape = "introduction"
                 st.rerun()
 
@@ -1770,12 +2071,18 @@ elif st.session_state.etape == "developpement":
         )
 
     st.write("### Ton plan")
-    st.write(st.session_state.plan_developpement)
+
+    st.write(
+        st.session_state.plan_developpement
+    )
 
     if st.session_state.nombre_voix != "1 voix":
 
         st.write("### Répartition prévue")
-        st.write(st.session_state.plan_repartition)
+
+        st.write(
+            st.session_state.plan_repartition
+        )
 
     developpement = st.text_area(
         "Ton développement :",
@@ -1786,21 +2093,32 @@ elif st.session_state.etape == "developpement":
     if st.button("Enregistrer mon développement"):
 
         if not developpement.strip():
-            st.warning("Écris d'abord ton développement.")
+
+            st.warning(
+                "Écris d'abord ton développement."
+            )
 
         else:
+
             st.session_state.developpement = developpement
+
             invalider_apres("developpement")
+
             st.session_state.etape = "controle_developpement"
+
             st.rerun()
 
 
 elif st.session_state.etape == "controle_developpement":
 
     st.subheader("Ton développement")
-    st.write(st.session_state.developpement)
+
+    st.write(
+        st.session_state.developpement
+    )
 
     if st.button("Modifier mon développement"):
+
         st.session_state.etape = "developpement"
         st.rerun()
 
@@ -1907,7 +2225,11 @@ DÉVELOPPEMENT :
                 st.rerun()
 
             except Exception as e:
-                st.error("Erreur pendant la vérification.")
+
+                st.error(
+                    "Erreur pendant la vérification."
+                )
+
                 st.code(str(e))
 
     else:
@@ -1920,15 +2242,20 @@ DÉVELOPPEMENT :
             st.success("✅ Développement validé")
 
             if st.button("Passer à la conclusion"):
+
                 st.session_state.etape = "conclusion"
                 st.rerun()
 
         else:
 
             st.subheader("Retour du Coach")
-            st.write(st.session_state.feedback_developpement)
+
+            st.write(
+                st.session_state.feedback_developpement
+            )
 
             if st.button("Corriger mon développement"):
+
                 st.session_state.etape = "developpement"
                 st.rerun()
 
@@ -1942,7 +2269,10 @@ elif st.session_state.etape == "conclusion":
     st.subheader("Rédiger la conclusion")
 
     st.write("### Ton plan")
-    st.write(st.session_state.plan_conclusion)
+
+    st.write(
+        st.session_state.plan_conclusion
+    )
 
     conclusion = st.text_area(
         "Ta conclusion :",
@@ -1953,21 +2283,32 @@ elif st.session_state.etape == "conclusion":
     if st.button("Enregistrer ma conclusion"):
 
         if not conclusion.strip():
-            st.warning("Écris d'abord ta conclusion.")
+
+            st.warning(
+                "Écris d'abord ta conclusion."
+            )
 
         else:
+
             st.session_state.conclusion = conclusion
+
             invalider_apres("conclusion")
+
             st.session_state.etape = "controle_conclusion"
+
             st.rerun()
 
 
 elif st.session_state.etape == "controle_conclusion":
 
     st.subheader("Ta conclusion")
-    st.write(st.session_state.conclusion)
+
+    st.write(
+        st.session_state.conclusion
+    )
 
     if st.button("Modifier ma conclusion"):
+
         st.session_state.etape = "conclusion"
         st.rerun()
 
@@ -2041,7 +2382,11 @@ CONCLUSION :
                 st.rerun()
 
             except Exception as e:
-                st.error("Erreur pendant la vérification.")
+
+                st.error(
+                    "Erreur pendant la vérification."
+                )
+
                 st.code(str(e))
 
     else:
@@ -2054,15 +2399,20 @@ CONCLUSION :
             st.success("✅ Conclusion validée")
 
             if st.button("Indiquer mes références"):
+
                 st.session_state.etape = "references"
                 st.rerun()
 
         else:
 
             st.subheader("Retour du Coach")
-            st.write(st.session_state.feedback_conclusion)
+
+            st.write(
+                st.session_state.feedback_conclusion
+            )
 
             if st.button("Corriger ma conclusion"):
+
                 st.session_state.etape = "conclusion"
                 st.rerun()
 
@@ -2172,9 +2522,13 @@ elif st.session_state.etape == "references":
 elif st.session_state.etape == "controle_references":
 
     st.subheader("Tes références")
-    st.write(references_affichees())
+
+    st.write(
+        references_affichees()
+    )
 
     if st.button("Modifier mes références"):
+
         st.session_state.etape = "references"
         st.rerun()
 
@@ -2195,6 +2549,7 @@ vérifie auteur, titre, média et date.
 
 Dans le parcours libre :
 plusieurs sources sont possibles.
+
 Vérifie surtout que les sources citées correspondent
 aux recherches utilisées et permettent raisonnablement
 de retrouver les documents.
@@ -2236,7 +2591,11 @@ RÉFÉRENCES :
                 st.rerun()
 
             except Exception as e:
-                st.error("Erreur pendant la vérification.")
+
+                st.error(
+                    "Erreur pendant la vérification."
+                )
+
                 st.code(str(e))
 
     else:
@@ -2251,7 +2610,9 @@ RÉFÉRENCES :
             if st.button("Assembler ma chronique"):
 
                 st.session_state.chronique = assembler_chronique()
+
                 st.session_state.feedback_final = ""
+
                 st.session_state.etape = "chronique_assemblee"
 
                 st.rerun()
@@ -2259,9 +2620,13 @@ RÉFÉRENCES :
         else:
 
             st.subheader("Retour du Coach")
-            st.write(st.session_state.feedback_references)
+
+            st.write(
+                st.session_state.feedback_references
+            )
 
             if st.button("Corriger mes références"):
+
                 st.session_state.etape = "references"
                 st.rerun()
 
@@ -2287,6 +2652,7 @@ elif st.session_state.etape == "chronique_assemblee":
     )
 
     if st.button("🔎 Lancer le contrôle final"):
+
         st.session_state.etape = "controle_final"
         st.rerun()
 
@@ -2314,6 +2680,7 @@ une correction réellement nécessaire.
 Vérifie :
 
 1. FIDÉLITÉ
+
 Toute information factuelle doit être justifiable
 par les documents et recherches fournis.
 
@@ -2322,22 +2689,28 @@ SÉLECTIONNER N'EST PAS DÉFORMER.
 L'omission d'informations n'est pas une erreur.
 
 2. INFORMATION INVENTÉE
+
 Signale un fait qui n'apparaît pas dans les recherches
 et ne peut pas raisonnablement en être déduit.
 
 3. EXACTITUDE
+
 Vérifie les nombres, dates, lieux, noms et données présentes.
 
 4. PLAGIAT
+
 Les faits précis peuvent être identiques.
+
 Signale seulement une reprise vraiment trop proche
 d'une phrase ou construction de la source.
 
 5. CLARTÉ
+
 Signale uniquement ce qui gêne réellement
 la compréhension à la première écoute.
 
 6. QUALITÉ RADIO
+
 Utilise un seuil minimal :
 court, clair, concis.
 
@@ -2426,7 +2799,11 @@ CHRONIQUE :
             st.rerun()
 
         except Exception as e:
-            st.error("Erreur pendant le contrôle final.")
+
+            st.error(
+                "Erreur pendant le contrôle final."
+            )
+
             st.code(str(e))
 
     else:
@@ -2498,6 +2875,7 @@ CHRONIQUE :
                     st.session_state.feedback_introduction = ""
                     st.session_state.feedback_final = ""
                     st.session_state.etape = "introduction"
+
                     st.rerun()
 
                 if st.button("Corriger la conclusion"):
@@ -2505,6 +2883,7 @@ CHRONIQUE :
                     st.session_state.feedback_conclusion = ""
                     st.session_state.feedback_final = ""
                     st.session_state.etape = "conclusion"
+
                     st.rerun()
 
             with col2:
@@ -2514,6 +2893,7 @@ CHRONIQUE :
                     st.session_state.feedback_developpement = ""
                     st.session_state.feedback_final = ""
                     st.session_state.etape = "developpement"
+
                     st.rerun()
 
                 if st.button("Corriger les références"):
@@ -2521,4 +2901,5 @@ CHRONIQUE :
                     st.session_state.feedback_references = ""
                     st.session_state.feedback_final = ""
                     st.session_state.etape = "references"
+
                     st.rerun()
