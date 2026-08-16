@@ -31,6 +31,48 @@ MODEL = "gpt-5.6-luna"
 
 
 # =========================================================
+# ACCÈS PROTÉGÉ
+# =========================================================
+
+if "acces_autorise" not in st.session_state:
+    st.session_state.acces_autorise = False
+
+if not st.session_state.acces_autorise:
+
+    st.title("🎙️ Coach d'écriture Radio ISTJ")
+
+    st.write(
+        "Entre le code d'accès donné par ton professeur "
+        "pour utiliser le Coach."
+    )
+
+    code_saisi = st.text_input(
+        "Code d'accès",
+        type="password"
+    )
+
+    if st.button("Entrer", use_container_width=True):
+
+        try:
+            code_attendu = str(st.secrets["ACCESS_CODE"]).strip()
+        except Exception:
+            st.error(
+                "Le code d'accès n'est pas configuré. "
+                "Préviens ton professeur."
+            )
+            st.stop()
+
+        if code_saisi.strip() == code_attendu:
+            st.session_state.acces_autorise = True
+            st.rerun()
+        else:
+            st.error("Code d'accès incorrect.")
+
+    st.stop()
+
+
+
+# =========================================================
 # FONCTIONS GÉNÉRALES
 # =========================================================
 
