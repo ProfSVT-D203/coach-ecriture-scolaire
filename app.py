@@ -3,6 +3,8 @@ import html
 
 import streamlit as st
 from openai import OpenAI
+from docx import Document
+from pypdf import PdfReader
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
@@ -22,8 +24,8 @@ from reportlab.platypus import (
 # =========================================================
 
 st.set_page_config(
-    page_title="Coach d'écriture Radio ISTJ",
-    page_icon="🎙️",
+    page_title="Coach d'écriture scolaire",
+    page_icon="✍️",
     layout="centered"
 )
 
@@ -39,7 +41,7 @@ if "acces_autorise" not in st.session_state:
 
 if not st.session_state.acces_autorise:
 
-    st.title("🎙️ Coach d'écriture Radio ISTJ")
+    st.title("✍️ Coach d'écriture scolaire")
 
     st.write(
         "Entre le code d'accès donné par ton professeur "
@@ -97,6 +99,80 @@ def appel_ia(instructions, contenu):
 
 def est_valide(feedback, mot):
     return feedback.strip().startswith(mot)
+
+
+def extraire_texte_fichier(fichier):
+    """Extrait le texte d'un fichier TXT, PDF texte ou DOCX."""
+
+    nom = fichier.name.lower()
+    donnees = fichier.getvalue()
+
+    if nom.endswith(".txt"):
+        try:
+            return donnees.decode("utf-8")
+        except UnicodeDecodeError:
+            return donnees.decode("cp1252", errors="replace")
+
+    if nom.endswith(".pdf"):
+        lecteur = PdfReader(io.BytesIO(donnees))
+        pages = []
+
+        for numero, page in enumerate(lecteur.pages, start=1):
+            texte_page = (page.extract_text() or "").strip()
+            if texte_page:
+                pages.append(f"[Page {numero}]\n{texte_page}")
+
+        texte = "\n\n".join(pages).strip()
+
+        if not texte:
+            raise ValueError(
+                "aucun texte exploitable n'a été trouvé dans ce PDF. "
+                "Il s'agit peut-être d'un document scanné sous forme d'image."
+            )
+
+        return texte
+
+    if nom.endswith(".docx"):
+        document = Document(io.BytesIO(donnees))
+        blocs = []
+
+        for paragraphe in document.paragraphs:
+            contenu = paragraphe.text.strip()
+            if contenu:
+                blocs.append(contenu)
+
+        for tableau in document.tables:
+            for ligne in tableau.rows:
+                cellules = [cellule.text.strip() for cellule in ligne.cells]
+                if any(cellules):
+                    blocs.append(" | ".join(cellules))
+
+        texte = "\n".join(blocs).strip()
+
+        if not texte:
+            raise ValueError("aucun texte exploitable n'a été trouvé dans ce document Word.")
+
+        return texte
+
+    raise ValueError("format de fichier non pris en charge.")
+
+
+def construire_dossier_documentaire(fichiers):
+    """Assemble plusieurs documents en un dossier clairement séparé."""
+
+    blocs = []
+    erreurs = []
+
+    for index, fichier in enumerate(fichiers, start=1):
+        try:
+            texte = extraire_texte_fichier(fichier)
+            blocs.append(
+                f"===== DOCUMENT {index} : {fichier.name} =====\n{texte}"
+            )
+        except Exception as exc:
+            erreurs.append(f"{fichier.name} : {exc}")
+
+    return "\n\n".join(blocs).strip(), erreurs
 
 
 def contexte_documentaire():
@@ -496,7 +572,7 @@ def pied_de_page(canvas, doc):
     canvas.drawString(
         2 * cm,
         1 * cm,
-        "Radio ISTJ - Coach d'écriture"
+        "Coach d'écriture scolaire"
     )
 
     canvas.drawRightString(
@@ -519,8 +595,8 @@ def generer_pdf():
         leftMargin=2 * cm,
         topMargin=2 * cm,
         bottomMargin=2 * cm,
-        title="Chronique Radio ISTJ",
-        author="Radio ISTJ"
+        title="Chronique scolaire",
+        author="Coach d'écriture scolaire"
     )
 
     styles = getSampleStyleSheet()
@@ -581,7 +657,7 @@ def generer_pdf():
 
     elements.append(
         Paragraph(
-            "RADIO ISTJ",
+            "COACH D'ÉCRITURE SCOLAIRE",
             style_radio
         )
     )
@@ -755,7 +831,7 @@ initialiser("feedback_final")
 # =========================================================
 
 REGLES_REDACTION = """
-Tu es le Coach d'écriture pédagogique de Radio ISTJ.
+Tu es un Coach d'écriture pédagogique pour des élèves de collège.
 
 Tu accompagnes un élève de collège qui écrit lui-même
 une chronique destinée à être entendue à la radio.
@@ -906,7 +982,7 @@ Cherche un seuil suffisant pour une chronique radio de collège.
 # TITRE + SIDEBAR
 # =========================================================
 
-st.title("🎙️ Coach d'écriture Radio ISTJ")
+st.title("✍️ Coach d'écriture scolaire")
 
 afficher_sidebar_libre()
 
@@ -955,17 +1031,55 @@ if st.session_state.etape == "accueil":
             "et rédiger ta chronique."
         )
 
-        source = st.text_area(
-            "Colle ici l'article ou la source :",
-            height=300
+        fichiers = st.file_uploader(
+            "📎 Importer un ou plusieurs documents :",
+            type=["pdf", "docx", "txt"],
+            accept_multiple_files=True,
+            help=(
+                "Tu peux déposer plusieurs documents. Le Coach les rassemblera "
+                "dans un même dossier documentaire en conservant le nom de chaque fichier."
+            )
+        )
+
+        st.caption(
+            "Formats acceptés : PDF contenant du texte, DOCX et TXT. "
+            "Les PDF constitués uniquement d'images scannées ne sont pas encore lus automatiquement."
+        )
+
+        source_collee = st.text_area(
+            "Ou colle directement un texte / une source :",
+            height=220
         )
 
         if st.button("Commencer le parcours guidé"):
 
-            if not source.strip():
+            dossier_importe, erreurs_import = construire_dossier_documentaire(
+                fichiers or []
+            )
+
+            parties_source = []
+
+            if dossier_importe:
+                parties_source.append(dossier_importe)
+
+            if source_collee.strip():
+                parties_source.append(
+                    "===== TEXTE COLLÉ =====\n" + source_collee.strip()
+                )
+
+            source = "\n\n".join(parties_source).strip()
+
+            if erreurs_import:
+                st.warning(
+                    "Certains fichiers n'ont pas pu être lus :\n\n- "
+                    + "\n- ".join(erreurs_import)
+                )
+
+            if not source:
 
                 st.warning(
-                    "Tu dois d'abord fournir une source."
+                    "Tu dois d'abord importer au moins un document "
+                    "ou coller une source."
                 )
 
             else:
@@ -1268,7 +1382,7 @@ elif st.session_state.etape == "libre_angle_verif":
         if st.button("🤖 Vérifier mon angle"):
 
             instructions = """
-Tu es le Coach d'écriture Radio ISTJ.
+Tu es un Coach d'écriture pédagogique pour des élèves de collège.
 
 Tu vérifies uniquement la relation :
 
@@ -1809,7 +1923,7 @@ elif st.session_state.etape == "plan_enregistre":
         if st.button("🤖 Faire vérifier mon plan"):
 
             instructions = """
-Tu vérifies le plan d'une chronique Radio ISTJ.
+Tu vérifies le plan d'une chronique rédigée par un élève de collège.
 
 Le plan peut être simple.
 
@@ -2986,7 +3100,7 @@ elif st.session_state.etape == "controle_references":
 
             instructions = """
 Tu vérifies uniquement les sources ou références
-d'une chronique Radio ISTJ.
+d'une chronique rédigée par un élève de collège.
 
 =========================================================
 PARCOURS GUIDÉ
@@ -3357,7 +3471,7 @@ elif st.session_state.etape == "controle_final":
 
         instructions = """
 Tu réalises le CONTRÔLE FINAL INDÉPENDANT
-d'une chronique Radio ISTJ.
+d'une chronique rédigée par un élève de collège.
 
 Tu disposes séparément :
 - de l'introduction ;
@@ -3736,16 +3850,16 @@ TEXTE COMPLET DESTINÉ À L'ANTENNE
 
             st.divider()
 
-            st.subheader("📄 PDF Radio ISTJ")
+            st.subheader("📄 PDF du travail")
 
             try:
 
                 pdf = generer_pdf()
 
                 st.download_button(
-                    label="📥 Télécharger le PDF Radio ISTJ",
+                    label="📥 Télécharger le PDF",
                     data=pdf,
-                    file_name="chronique_radio_istj.pdf",
+                    file_name="chronique_scolaire.pdf",
                     mime="application/pdf",
                     use_container_width=True
                 )
